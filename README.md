@@ -3,10 +3,8 @@ Flame++ is my idea for a High Level Language that targets the NES (and
 maybe other systems too eventually).
 
 
-A sort of short term goal is for Flame++ compiler will output code
-targeting the NES by outputing ca65 assembly source files.
+The current long term goal is for Flame++ compiler to output ca65 assembly
+source files.
 
 
-
-[Here](http://cc65.github.io/doc/ca65.html) is ca65
-
+[Here is ca65](http://cc65.github.io/doc/ca65.html).
