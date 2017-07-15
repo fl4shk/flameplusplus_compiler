@@ -16,10 +16,9 @@
 // with Flame++ Compiler.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "misc_includes.hpp"
+#ifndef misc_includes_hpp
+#define misc_includes_hpp
 
-int main(int argc, char** argv)
-{
-	
-	return 0;
-}
+
+
+#endif		// misc_includes_hpp
