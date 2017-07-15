@@ -1,4 +1,4 @@
-# flameplusplus\_compiler
+# Flame++ Compiler
 Flame++ is my idea for a High Level Language that targets the NES (and
 maybe other systems too eventually).
 
