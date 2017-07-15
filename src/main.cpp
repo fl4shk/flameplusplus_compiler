@@ -18,6 +18,26 @@
 
 #include "misc_includes.hpp"
 
+
+namespace flame_plus_plus
+{
+
+class Compiler
+{
+public:		// variables
+	
+
+
+public:		// functions
+	Compiler();
+	~Compiler();
+
+};
+
+
+}
+
+
 int main(int argc, char** argv)
 {
 
