@@ -12,7 +12,7 @@ namespace printout_etc
 
 
 template<typename... ArgTypes>
-void osprintout(std::ostream& os, ArgTypes&&... args);
+std::ostream& osprintout(std::ostream& os, ArgTypes&&... args);
 
 class AnyPrintoutBackend
 {
@@ -27,34 +27,36 @@ private:		// functions
 		os << first_val;
 		func(os, rem_args...);
 	}
-	
+
 	template<typename... ArgTypes>
-	friend void osprintout(std::ostream& os, ArgTypes&&... args);
+	friend std::ostream& osprintout(std::ostream& os, 
+		ArgTypes&&... args);
 };
 
 template<typename... ArgTypes>
-inline void osprintout(std::ostream& os, ArgTypes&&... args)
+inline std::ostream& osprintout(std::ostream& os, ArgTypes&&... args)
 {
 	AnyPrintoutBackend::func(os, args...);
+	return os;
 }
 
 template<typename... ArgTypes>
-inline void printout(ArgTypes&&... args)
+inline std::ostream& printout(ArgTypes&&... args)
 {
-	osprintout(cout, args...);
+	return osprintout(cout, args...);
 }
 
 template<typename... ArgTypes>
-inline void printerr(ArgTypes&&... args)
+inline std::ostream& printerr(ArgTypes&&... args)
 {
-	osprintout(cerr, args...);
+	return osprintout(cerr, args...);
 }
 
 // Alternate name for osprintout
 template<typename... ArgTypes>
-inline void fprintout(std::ostream& out_file, ArgTypes&&... args)
+inline std::ostream& fprintout(std::ostream& out_file, ArgTypes&&... args)
 {
-	osprintout(out_file, args...);
+	return osprintout(out_file, args...);
 }
 
 
@@ -80,7 +82,6 @@ std::string sconcat(const FirstType& first_val,
 
 	return ret;
 }
-
 
 
 }
