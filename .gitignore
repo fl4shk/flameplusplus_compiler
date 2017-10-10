@@ -37,3 +37,5 @@ docs/makefile
 docs/*.gpp.ignore
 docs/*.txt.ignore
 docs/tests
+flame++_compiler
+flame++_compiler_debug
