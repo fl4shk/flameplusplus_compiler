@@ -16,45 +16,40 @@
 // with Flame++ Compiler.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef compiler_class_hpp
-#define compiler_class_hpp
+#include "symbol_table_class.hpp"
 
 
-#include "lexer_class.hpp"
-#include "var_class.hpp"
-//#include "code_generator_class.hpp"
-
-namespace flame_plus_plus
+std::ostream& operator << (std::ostream& os, 
+	const flame_plus_plus::SymType& to_print)
 {
+	using flame_plus_plus::SymType;
 
-class Compiler
-{
-private:		// variables
-	WarnError __we;
-	Lexer __lexer;
-	SymbolTable __sym_tbl;
-	ScopedIdentTable<Var> __var_tbl;
-	size_t __line_num = 0;
+	switch (to_print)
+	{
+		case SymType::Keyword:
+			os << "Keyword";
+			break;
 
+		case SymType::BuiltinTypename:
+			os << "BuiltinTypename";
+			break;
 
+		case SymType::VarName:
+			os << "VarName";
+			break;
 
-public:		// functions
-	Compiler();
+		case SymType::FuncName:
+			os << "FuncName";
+			break;
 
+		case SymType::StructName:
+			os << "StructName";
+			break;
 
+		default:
+			os << "Unknown";
+			break;
+	}
 
-
-
-private:		// functions
-	gen_getter_by_ref(we);
-	gen_getter_by_ref(lexer);
-	gen_getter_by_ref(sym_tbl);
-	gen_getter_by_ref(var_tbl);
-	gen_getter_by_val(line_num);
-
-
-};
-
+	return os;
 }
-
-#endif		// compiler_class_hpp

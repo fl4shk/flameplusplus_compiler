@@ -19,7 +19,7 @@
 #ifndef code_generator_class_hpp
 #define code_generator_class_hpp
 
-#include "lexer_class.hpp"
+#include "code_generator_class.hpp"
 
 namespace flame_plus_plus
 {

@@ -59,6 +59,10 @@ public:		// functions
 		{
 			table().pop_back();
 		}
+		else
+		{
+			printerr("ScopedIdentTable::del_scope():  Eek!\n");
+		}
 	}
 
 	inline auto& at(size_t table_index)
@@ -90,23 +94,29 @@ public:		// functions
 		at(level).insert_or_assign(std::move(to_insert_or_assign));
 	}
 
-	s64 find(const std::string& name) __attribute__((noinline))
+	Type* find(const std::string& name) __attribute__((noinline))
 	{
 		// Check builtins first.
 		if (table().at(builtin_scope_level).contains(name))
 		{
-			return builtin_scope_level;
+			//return builtin_scope_level;
+			return &table().at(builtin_scope_level).at(name);
 		}
 
 		for (s64 i=cur_lev(); i>=builtin_scope_level; --i)
 		{
 			if (table().at(i).contains(name))
 			{
-				return i;
+				return &table().at(i).at(name);
 			}
 		}
 
-		return not_found_level;
+		return nullptr;
+	}
+
+	bool name_is_builtin(const std::string& name) const
+	{
+		return table().at(builtin_scope_level).contains(name);
 	}
 
 	gen_getter_by_con_ref(table);
@@ -124,7 +134,8 @@ public:		// functions
 			for (const auto& inner_iter : outer_iter.table())
 			{
 				printout("level ", i, ":  \"", inner_iter.first, "\":  ", 
-					inner_iter.second.tok()->str(), "\n");
+					inner_iter.second.tok()->str(), ", ", 
+					inner_iter.second.type(), "\n");
 			}
 		}
 	}

@@ -37,18 +37,22 @@ void test_symbol_table()
 
 	SymbolTable test;
 	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
-	test.insert_or_assign(Symbol(&Tok::If, SymType::Keyword));
 
-
-	test.insert_or_assign(Symbol(&Tok::S8, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::S16, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::S32, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::S64, SymType::BuiltinTypename));
 
 	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::U16, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::U32, SymType::BuiltinTypename));
-	//test.insert_or_assign(Symbol(&Tok::U64, SymType::BuiltinTypename));
+
+
+	test.make_scope();
+	test.make_scope();
+	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+
+	test.debug_print();
+
+	printout("\n");
+
+	test.del_scope();
+	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+
 
 	test.debug_print();
 }

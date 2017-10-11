@@ -23,12 +23,7 @@
 #include "misc_includes.hpp"
 #include "tokens_and_stuff.hpp"
 
-//#include "ident_table_class.hpp"
 #include "scoped_ident_table_class.hpp"
-
-//#include "var_class.hpp"
-//#include "func_class.hpp"
-//#include "structure_class.hpp"
 
 namespace flame_plus_plus
 {
@@ -38,9 +33,10 @@ enum class SymType
 	Keyword,
 	BuiltinTypename,
 	VarName,
-	//FuncName,
-	//StructName,
+	FuncName,
+	StructName,
 };
+
 
 class Symbol
 {
@@ -48,10 +44,6 @@ private:		// variables
 	std::string __name;
 
 	PTok __tok = nullptr;
-
-	//Var* __var = nullptr;
-	//Func* __func = nullptr;
-	//Structure* __structure = nullptr;
 
 	SymType __type;
 
@@ -87,5 +79,9 @@ public:		// functions
 typedef ScopedIdentTable<Symbol> SymbolTable;
 
 }
+
+
+std::ostream& operator << (std::ostream& os, 
+	const flame_plus_plus::SymType& to_print);
 
 #endif		// symbol_table_class_hpp
