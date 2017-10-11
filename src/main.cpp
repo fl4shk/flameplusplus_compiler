@@ -16,19 +16,39 @@
 // with Flame++ Compiler.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "misc_includes.hpp"
+#include "compiler_class.hpp"
 
-
-//namespace flame_plus_plus
-//{
-//
-//}
-
+void test_symbol_table();
 
 
 
 int main(int argc, char** argv)
 {
+	test_symbol_table();
 
 	return 0;
+}
+
+
+void test_symbol_table()
+{
+	using namespace flame_plus_plus;
+
+
+	SymbolTable test;
+	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
+	test.insert_or_assign(Symbol(&Tok::If, SymType::Keyword));
+
+
+	test.insert_or_assign(Symbol(&Tok::S8, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::S16, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::S32, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::S64, SymType::BuiltinTypename));
+
+	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::U16, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::U32, SymType::BuiltinTypename));
+	//test.insert_or_assign(Symbol(&Tok::U64, SymType::BuiltinTypename));
+
+	test.debug_print();
 }
