@@ -27,4 +27,57 @@ Compiler::Compiler()
 {
 }
 
+
+void Compiler::init(int s_argc, char** s_argv)
+{
+	__argc = s_argc;
+	__argv = s_argv;
+
+	parse_args();
+
+
+	fill_builtin_symbol_table();
+}
+
+int Compiler::operator () ()
+{
+	__lexer.lex();
+
+	printout(__lexer.next_tok()->str(), "\n");
+
+	return 0;
+}
+
+
+void Compiler::parse_args()
+{
+	if (argc() != 1)
+	{
+		printerr("Usage:  ", argv()[0], "\n");
+		exit(1);
+	}
+}
+
+void Compiler::fill_builtin_symbol_table()
+{
+	#define TOKEN_STUFF(varname, value) \
+		sym_tbl().insert_or_assign(Symbol(&Tok::varname, \
+			SymType::Keyword));
+
+	LIST_OF_KEYWORD_TOKENS(TOKEN_STUFF);
+	
+	#undef TOKEN_STUFF
+
+
+	#define TOKEN_STUFF(varname, value) \
+		sym_tbl().insert_or_assign(Symbol(&Tok::varname, \
+			SymType::BuiltinTypename));
+
+	LIST_OF_DEFAULT_INT_TYPENAME_TOKENS(TOKEN_STUFF);
+
+	#undef TOKEN_STUFF
+
+	//sym_tbl().debug_print();
+}
+
 }

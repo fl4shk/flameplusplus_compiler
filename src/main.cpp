@@ -18,41 +18,41 @@
 
 #include "compiler_class.hpp"
 
-void test_symbol_table();
-
+flame_plus_plus::Compiler compiler;
 
 
 int main(int argc, char** argv)
 {
-	test_symbol_table();
+	compiler.init(argc, argv);
+	return compiler();
 
 	return 0;
 }
 
 
-void test_symbol_table()
-{
-	using namespace flame_plus_plus;
-
-
-	SymbolTable test;
-	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
-
-
-	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
-
-
-	test.make_scope();
-	test.make_scope();
-	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
-
-	test.debug_print();
-
-	printout("\n");
-
-	test.del_scope();
-	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
-
-
-	test.debug_print();
-}
+//void test_symbol_table()
+//{
+//	using namespace flame_plus_plus;
+//
+//
+//	SymbolTable test;
+//	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
+//
+//
+//	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
+//
+//
+//	test.make_scope();
+//	test.make_scope();
+//	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+//
+//	test.debug_print();
+//
+//	printout("\n");
+//
+//	test.del_scope();
+//	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+//
+//
+//	test.debug_print();
+//}

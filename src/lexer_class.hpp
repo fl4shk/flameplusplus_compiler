@@ -50,13 +50,26 @@ private:		// variables
 public:		// functions
 	Lexer(WarnError* s_we, SymbolTable* s_sym_tbl, size_t* s_line_num);
 
-	PTok advance();
-	PTok lex();
+	void advance();
+	void lex();
 
-	gen_getter_by_val(next_char);
-	gen_getter_by_val(next_tok);
-	gen_getter_by_con_ref(next_sym_str);
-	gen_getter_by_val(next_num);
+	inline auto next_char() const
+	{
+		return __next_char;
+	}
+
+	inline auto next_tok() const
+	{
+		return __next_tok;
+	}
+	inline const std::string& next_sym_str() const
+	{
+		return __next_sym_str;
+	}
+	inline s64 next_num() const
+	{
+		return __next_num;
+	}
 
 
 private:		// functions
@@ -80,10 +93,36 @@ private:		// functions
 		*__line_num = n_line_num;
 	}
 
-	gen_setter_by_val(next_char);
-	gen_setter_by_val(next_tok);
-	gen_setter_by_con_ref(next_sym_str);
-	gen_setter_by_val(next_num);
+	inline auto set_next_char(int n_next_char)
+	{
+		__next_char = n_next_char;
+		return next_char();
+	}
+
+	inline auto set_next_tok(PTok n_next_tok)
+	{
+		__next_tok = n_next_tok;
+		return next_tok();
+	}
+
+	inline const std::string& set_next_sym_str
+		(const std::string& n_next_sym_str)
+	{
+		__next_sym_str = n_next_sym_str;
+		return next_sym_str();
+	}
+	inline const std::string& set_next_sym_str
+		(std::string&& n_next_sym_str)
+	{
+		__next_sym_str = std::move(n_next_sym_str);
+		return next_sym_str();
+	}
+
+	inline auto set_next_num(s64 n_next_num)
+	{
+		__next_num = n_next_num;
+		return next_num();
+	}
 
 };
 

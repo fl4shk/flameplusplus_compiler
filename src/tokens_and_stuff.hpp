@@ -107,16 +107,17 @@ TOKEN_STUFF(NatNum, "NaturalNumber") \
 \
 LIST_OF_IDENT_ISH_TOKENS(TOKEN_STUFF) \
 \
-/* "Newline", "EOF", "Bad" */ \
-TOKEN_STUFF(Newline, "newline") \
+/* "EOF", "Bad" */ \
+/* TOKEN_STUFF(Newline, "newline") */ \
 TOKEN_STUFF(Eof, "EOF") \
 TOKEN_STUFF(Bad, "Bad")
 
 
 #define LIST_OF_KEYWORD_TOKENS(TOKEN_STUFF) \
-/* "if", "while", etc. */ \
+/* "if", "else", "while", etc. */ \
 TOKEN_STUFF(If, "if") \
-TOKEN_STUFF(While, "while")
+TOKEN_STUFF(Else, "else") \
+TOKEN_STUFF(While, "while") \
 
 
 #define LIST_OF_UNSGN_INT_TYPENAMES(TOKEN_STUFF) \
@@ -124,14 +125,14 @@ TOKEN_STUFF(While, "while")
 TOKEN_STUFF(U8, "u8") \
 TOKEN_STUFF(U16, "u16") \
 TOKEN_STUFF(U32, "u32") \
-TOKEN_STUFF(U64, "u64")
+TOKEN_STUFF(U64, "u64") \
 
 #define LIST_OF_SGN_INT_TYPENAMES(TOKEN_STUFF) \
 /* "u8", "u16", "u32", "u64" */ \
 TOKEN_STUFF(S8, "s8") \
 TOKEN_STUFF(S16, "s16") \
 TOKEN_STUFF(S32, "s32") \
-TOKEN_STUFF(S64, "s64")
+TOKEN_STUFF(S64, "s64") \
 
 #define LIST_OF_DEFAULT_INT_TYPENAME_TOKENS(TOKEN_STUFF) \
 LIST_OF_UNSGN_INT_TYPENAMES(TOKEN_STUFF) \

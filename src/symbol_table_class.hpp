@@ -32,6 +32,11 @@ enum class SymType
 {
 	Keyword,
 	BuiltinTypename,
+
+
+	// Used by the lexer, fixed by the parser
+	UnknownUserIdent,
+
 	VarName,
 	FuncName,
 	StructName,
@@ -76,7 +81,26 @@ public:		// functions
 };
 
 //typedef IdentTable<Symbol> SymbolTable;
-typedef ScopedIdentTable<Symbol> SymbolTable;
+//typedef ScopedIdentTable<Symbol> SymbolTable;
+
+
+class SymbolTable : public ScopedIdentTable<Symbol>
+{
+public:		// functions
+	void debug_print() __attribute__((noinline))
+	{
+		for (size_t i=0; i<table().size(); ++i)
+		{
+			auto& outer_iter = table().at(i);
+			for (const auto& inner_iter : outer_iter.table())
+			{
+				printout("level ", i, ":  \"", inner_iter.first, "\":  ", 
+					inner_iter.second.tok()->str(), ", ", 
+					inner_iter.second.type(), "\n");
+			}
+		}
+	}
+};
 
 }
 

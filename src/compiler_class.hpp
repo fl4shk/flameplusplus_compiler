@@ -37,12 +37,17 @@ private:		// variables
 	size_t __line_num = 0;
 
 
+	int __argc;
+	char** __argv;
+
+
 
 public:		// functions
 	Compiler();
 
+	void init(int s_argc, char** s_argv);
 
-
+	int operator () ();
 
 
 private:		// functions
@@ -51,6 +56,12 @@ private:		// functions
 	gen_getter_by_ref(sym_tbl);
 	gen_getter_by_ref(var_tbl);
 	gen_getter_by_val(line_num);
+	gen_getter_by_val(argc);
+	gen_getter_by_val(argv);
+
+
+	void parse_args();
+	void fill_builtin_symbol_table();
 
 
 };

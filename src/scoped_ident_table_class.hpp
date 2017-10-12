@@ -94,29 +94,34 @@ public:		// functions
 		at(level).insert_or_assign(std::move(to_insert_or_assign));
 	}
 
-	Type* find(const std::string& name) __attribute__((noinline))
+	Type* find(const std::string& some_name) __attribute__((noinline))
 	{
 		// Check builtins first.
-		if (table().at(builtin_scope_level).contains(name))
+		if (table().at(builtin_scope_level).contains(some_name))
 		{
 			//return builtin_scope_level;
-			return &table().at(builtin_scope_level).at(name);
+			return &table().at(builtin_scope_level).at(some_name);
 		}
 
 		for (s64 i=cur_lev(); i>=builtin_scope_level; --i)
 		{
-			if (table().at(i).contains(name))
+			if (table().at(i).contains(some_name))
 			{
-				return &table().at(i).at(name);
+				return &table().at(i).at(some_name);
 			}
 		}
 
 		return nullptr;
 	}
 
-	bool name_is_builtin(const std::string& name) const
+	//inline bool contains(const std::string& some_name) const
+	//{
+	//	return (find(some_name) != nullptr);
+	//}
+
+	bool name_is_builtin(const std::string& some_name) const
 	{
-		return table().at(builtin_scope_level).contains(name);
+		return table().at(builtin_scope_level).contains(some_name);
 	}
 
 	gen_getter_by_con_ref(table);
@@ -124,20 +129,6 @@ public:		// functions
 	inline s64 cur_lev() const
 	{
 		return (table().size() - 1);
-	}
-
-	void debug_print() __attribute__((noinline))
-	{
-		for (size_t i=0; i<table().size(); ++i)
-		{
-			auto& outer_iter = table().at(i);
-			for (const auto& inner_iter : outer_iter.table())
-			{
-				printout("level ", i, ":  \"", inner_iter.first, "\":  ", 
-					inner_iter.second.tok()->str(), ", ", 
-					inner_iter.second.type(), "\n");
-			}
-		}
 	}
 };
 
