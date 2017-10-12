@@ -23,6 +23,7 @@
 #include "tokens_and_stuff.hpp"
 
 #include "scoped_ident_table_class.hpp"
+#include "symbol_table_class.hpp"
 
 namespace flame_plus_plus
 {
@@ -30,14 +31,13 @@ namespace flame_plus_plus
 class Var
 {
 private:		// variables (inside the Var class... yay!)
-	// Obvious
-	std::string __name;
-
 	// What typename was used for this variable?
-	// This permits using both built-in type names and custom ones,
-	// assuming custom ones exist at some point, by using the __typename
-	// to find 
-	std::string __typname;
+	// This permits using both built-in type names and custom ones
+	Symbol* __type_sym = nullptr;
+
+
+	// What symbol does this variable belong to?
+	Symbol* __sym = nullptr;
 
 
 	// Scope level of this variable's symbol (must be greater than 0 for
@@ -53,10 +53,10 @@ public:		// functions
 	{
 	}
 
-	inline Var(const std::string& s_name, const std::string& s_typname,
-		s64 s_scope_lev, size_t s_dim)
-		: __name(s_name), __typname(s_typname), __scope_lev(s_scope_lev),
-		__dim(s_dim)
+	inline Var(Symbol* s_type_sym, Symbol* s_sym, s64 s_scope_lev,
+		size_t s_dim) 
+		: __type_sym(s_type_sym), __sym(s_sym),
+		__scope_lev(s_scope_lev), __dim(s_dim)
 	{
 	}
 
@@ -67,10 +67,17 @@ public:		// functions
 	inline Var& operator = (Var&& to_move) = default;
 
 
-	gen_getter_and_setter_by_con_ref(name);
-	gen_setter_by_rval_ref(name);
-	gen_getter_and_setter_by_con_ref(typname);
-	gen_setter_by_rval_ref(typname);
+	inline const std::string& type_name() const
+	{
+		return type_sym()->name();
+	}
+	inline const std::string& name() const
+	{
+		return sym()->name();
+	}
+
+	gen_getter_and_setter_by_val(type_sym);
+	gen_getter_and_setter_by_val(sym);
 	gen_getter_and_setter_by_val(scope_lev);
 	gen_getter_and_setter_by_val(dim);
 

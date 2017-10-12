@@ -33,7 +33,7 @@ void Compiler::init(int s_argc, char** s_argv)
 	__argc = s_argc;
 	__argv = s_argv;
 
-	parse_args();
+	handle_argv();
 
 
 	fill_builtin_symbol_table();
@@ -41,19 +41,27 @@ void Compiler::init(int s_argc, char** s_argv)
 
 int Compiler::operator () ()
 {
-	while ((lexer().next_tok() != &Tok::Eof)
-		&& (lexer().next_tok() != &Tok::Bad))
-	{
-		__lexer.lex();
+	//while ((next_tok() != &Tok::Eof)
+	//	&& (next_tok() != &Tok::Bad))
+	//{
+	//	lex();
 
-		printout(__lexer.next_tok()->str(), "\n");
-	}
+	//	//printout(next_tok()->str(), "\n");
+	//}
+
+	lex();
+
+	// For user idents
+	make_scope();
+
+	// Parse
+	parse_program();
 
 	return 0;
 }
 
 
-void Compiler::parse_args()
+void Compiler::handle_argv()
 {
 	if (argc() != 1)
 	{
@@ -82,6 +90,268 @@ void Compiler::fill_builtin_symbol_table()
 	#undef TOKEN_STUFF
 
 	//sym_tbl().debug_print();
+}
+
+void Compiler::parse_program()
+{
+	parse_statements();
+}
+
+void Compiler::parse_statements()
+{
+	if (parse_scope(true))
+	{
+		parse_scope();
+	}
+	else
+	{
+		while (parse_var_decl(true))
+		{
+			parse_var_decl();
+		}
+		while (parse_non_var_decl_statements(true))
+		{
+			parse_non_var_decl_statements();
+		}
+	}
+}
+
+bool Compiler::parse_scope(bool just_test)
+{
+	if (parse_one_statement(true))
+	{
+		if (!just_test)
+		{
+			make_scope();
+			parse_one_statement();
+			del_scope();
+		}
+		return true;
+	}
+	else if (next_tok() == &Tok::LBrace)
+	{
+		if (!just_test)
+		{
+			match(&Tok::LBrace);
+			make_scope();
+
+			parse_statements();
+
+			del_scope();
+			match(&Tok::RBrace);
+		}
+		return true;
+	}
+	else
+	{
+		if (!just_test)
+		{
+			we().err("parse_scope():  Unexpected token");
+		}
+		return false;
+	}
+}
+
+
+bool Compiler::parse_one_statement(bool just_test)
+{
+	if (parse_var_decl(true))
+	{
+		if (!just_test)
+		{
+			parse_var_decl();
+		}
+		return true;
+	}
+	else if (parse_non_var_decl_statements(true))
+	{
+		if (!just_test)
+		{
+			parse_non_var_decl_statements();
+		}
+		return true;
+	}
+	else
+	{
+		if (!just_test)
+		{
+			we().err("parse_one_statement():  Unexpected token");
+		}
+		return false;
+	}
+}
+
+bool Compiler::parse_var_decl(bool just_test)
+{
+	Symbol* type_sym = sym_tbl().find(next_sym_str());
+
+	// Adjust this later for user-defined types
+	if (type_sym->type() != SymType::BuiltinTypename)
+	{
+		if (just_test)
+		{
+			return false;
+		}
+		else
+		{
+			we().err("parse_var_decl():  Unexpected token");
+		}
+	}
+	if (just_test)
+	{
+		return true;
+	}
+
+	lex();
+
+	{
+	if (next_tok() != &Tok::Ident)
+	{
+		we().expected_tokens(&Tok::Ident);
+	}
+
+	Symbol* sym = sym_tbl().find(next_sym_str());
+	sym->set_type(SymType::VarName);
+
+	// No arrays for now
+	var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(), 0));
+
+	lex();
+	}
+
+	while (next_tok() == &Tok::Comma)
+	{
+		match(&Tok::Comma);
+
+		if (next_tok() != &Tok::Ident)
+		{
+			we().expected_tokens(&Tok::Ident);
+		}
+
+		Symbol* sym = sym_tbl().find(next_sym_str());
+		sym->set_type(SymType::VarName);
+
+		// No arrays for now
+		var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(), 0));
+
+		lex();
+	}
+
+	match(&Tok::Semicolon);
+}
+
+
+bool Compiler::parse_non_var_decl_statements(bool just_test)
+{
+	if (parse_while_loop_stmt(true))
+	{
+		if (!just_test)
+		{
+			parse_while_loop_stmt();
+		}
+		return true;
+	}
+	else if (parse_if_stmt(true))
+	{
+		if (!just_test)
+		{
+			parse_if_stmt();
+		}
+		return true;
+	}
+	else if (parse_assignment_stmt(true))
+	{
+		if (!just_test)
+		{
+			parse_assignment_stmt();
+		}
+		return true;
+	}
+	else
+	{
+		if (!just_test)
+		{
+			we().err("parse_non_var_decl_statements():  Unexpected token");
+		}
+		return false;
+	}
+}
+
+bool Compiler::parse_while_loop_stmt(bool just_test)
+{
+	if (next_tok() != &Tok::While)
+	{
+		if (!just_test)
+		{
+			we().err("parse_while_loop_stmt():  Unexpected token");
+		}
+		return false;
+	}
+	if (just_test)
+	{
+		return true;
+	}
+
+}
+bool Compiler::parse_if_stmt(bool just_test)
+{
+	if (parse_if_stmt_head(true))
+	{
+		if (!just_test)
+		{
+			parse_if_stmt_head();
+		}
+		return true;
+	}
+	else
+	{
+		if (!just_test)
+		{
+			we().err("parse_if_stmt():  Unexpected token");
+		}
+		return false;
+	}
+}
+bool Compiler::parse_if_stmt_head(bool just_test)
+{
+	if (next_tok() != &Tok::If)
+	{
+		if (!just_test)
+		{
+			we().err("parse_if_stmt_head():  Unexpected token");
+		}
+		return false;
+	}
+	if (just_test)
+	{
+		return true;
+	}
+
+	lex();
+	match(&Tok::LParen);
+	parse_expr();
+	match(&Tok::RParen);
+	parse_scope();
+}
+bool Compiler::parse_else_stmt(bool just_test)
+{
+}
+bool Compiler::parse_assignment_stmt(bool just_test)
+{
+}
+
+
+void Compiler::parse_expr_regular()
+{
+}
+void Compiler::parse_expr()
+{
+}
+void Compiler::parse_term()
+{
+}
+void Compiler::parse_factor()
+{
 }
 
 }

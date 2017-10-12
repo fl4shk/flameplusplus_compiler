@@ -59,9 +59,80 @@ private:		// functions
 	gen_getter_by_val(argc);
 	gen_getter_by_val(argv);
 
+	inline void lex()
+	{
+		__lexer.lex();
+	}
 
-	void parse_args();
+	inline auto next_char() const
+	{
+		return __lexer.next_char();
+	}
+	inline auto next_tok() const
+	{
+		return __lexer.next_tok();
+	}
+	inline const std::string& next_sym_str() const
+	{
+		return __lexer.next_sym_str();
+	}
+	inline auto next_num() const
+	{
+		return __lexer.next_num();
+	}
+
+	inline void make_scope()
+	{
+		sym_tbl().make_scope();
+		var_tbl().make_scope();
+	}
+	inline void del_scope()
+	{
+		sym_tbl().del_scope();
+		var_tbl().del_scope();
+	}
+
+	inline auto scope_lev() const
+	{
+		return __sym_tbl.cur_lev();
+	}
+
+
+	void handle_argv();
 	void fill_builtin_symbol_table();
+
+	inline void match(PTok tok)
+	{
+		if (next_tok() == tok)
+		{
+			lex();
+		}
+		else
+		{
+			we().expected_tokens(tok);
+		}
+	}
+
+	void parse_program();
+	void parse_statements();
+
+
+	bool parse_scope(bool just_test=false);
+
+	bool parse_one_statement(bool just_test=false);
+	bool parse_var_decl(bool just_test=false);
+	bool parse_non_var_decl_statements(bool just_test=false);
+
+	bool parse_while_loop_stmt(bool just_test=false);
+	bool parse_if_stmt(bool just_test=false);
+	bool parse_if_stmt_head(bool just_test=false);
+	bool parse_else_stmt(bool just_test=false);
+	bool parse_assignment_stmt(bool just_test=false);
+
+	void parse_expr_regular();
+	void parse_expr();
+	void parse_term();
+	void parse_factor();
 
 
 };

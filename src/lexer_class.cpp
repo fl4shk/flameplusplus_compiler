@@ -134,6 +134,8 @@ void Lexer::lex()
 		{
 			// ...Then create a new symbol
 			//printout("Creating a new symbol....\n");
+
+			// The parser will figure out what type of user ident this is.
 			Symbol to_insert(next_str, &Tok::Ident,
 				SymType::UnknownUserIdent);
 
@@ -263,6 +265,15 @@ void Lexer::lex()
 	if (handle_multi_combo_2('/', &Tok::Div,
 		'/', &Tok::LineComment))
 	{
+		// Line Comment becomes end of line
+		if (next_tok() == &Tok::LineComment)
+		{
+			while ((next_char() != '\n') && (next_char() != EOF))
+			{
+				advance();
+			}
+			lex();
+		}
 		return;
 	}
 
