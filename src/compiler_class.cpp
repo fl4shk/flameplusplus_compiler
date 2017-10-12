@@ -41,9 +41,13 @@ void Compiler::init(int s_argc, char** s_argv)
 
 int Compiler::operator () ()
 {
-	__lexer.lex();
+	while ((lexer().next_tok() != &Tok::Eof)
+		&& (lexer().next_tok() != &Tok::Bad))
+	{
+		__lexer.lex();
 
-	printout(__lexer.next_tok()->str(), "\n");
+		printout(__lexer.next_tok()->str(), "\n");
+	}
 
 	return 0;
 }
