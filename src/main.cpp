@@ -66,11 +66,13 @@ void test_ir_code()
 {
 	using namespace flame_plus_plus;
 
+
 	IrCode code;
 
 	auto node0 = code.mk_const(9000);
 	auto node1 = code.mk_const(74);
 	auto node2 = code.mk_binop(IrnOp::Add, node0, node1);
+	auto node3 = code.mk_lab(0);
 
 	for (auto irn=code.head.next; irn!=&code.head; irn=irn->next)
 	{
