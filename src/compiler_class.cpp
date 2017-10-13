@@ -240,6 +240,8 @@ bool Compiler::parse_var_decl(bool just_test)
 	}
 
 	match(&Tok::Semicolon);
+
+	return true;
 }
 
 
@@ -297,21 +299,27 @@ bool Compiler::parse_while_loop_stmt(bool just_test)
 }
 bool Compiler::parse_if_stmt(bool just_test)
 {
+	return false;
 }
 bool Compiler::parse_if_stmt_head(bool just_test)
 {
+	return false;
 }
 bool Compiler::parse_else_stmt(bool just_test)
 {
+	return false;
 }
 bool Compiler::parse_break_stmt(bool just_test)
 {
+	return false;
 }
 bool Compiler::parse_continue_stmt(bool just_test)
 {
+	return false;
 }
 bool Compiler::parse_assignment_stmt(bool just_test)
 {
+	return false;
 }
 
 

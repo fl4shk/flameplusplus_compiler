@@ -118,6 +118,8 @@ TOKEN_STUFF(Bad, "Bad")
 TOKEN_STUFF(If, "if") \
 TOKEN_STUFF(Else, "else") \
 TOKEN_STUFF(While, "while") \
+TOKEN_STUFF(Break, "break") \
+TOKEN_STUFF(Continue, "continue") \
 
 
 #define LIST_OF_UNSGN_INT_TYPENAMES(TOKEN_STUFF) \

@@ -21,6 +21,96 @@
 namespace flame_plus_plus
 {
 
+bool IrNode::is_binop() const
+{
+	return any_irnop_matches(op, IrnOp::Add, IrnOp::Sub, IrnOp::Mul,
+		IrnOp::UnsgnDiv, IrnOp::UnsgnMod,
+		IrnOp::SgnDiv, IrnOp::SgnMod,
+
+		IrnOp::BitAnd, IrnOp::BitOr, IrnOp::BitXor,
+
+		IrnOp::Lsl, IrnOp::Lsr, IrnOp::Asr,
+
+		IrnOp::Eq, 
+		IrnOp::UnsgnGt, IrnOp::UnsgnGe, 
+		IrnOp::SgnGt, IrnOp::SgnGe);
+}
+
+bool IrNode::is_commutative_binop() const
+{
+	return any_irnop_matches(op, IrnOp::Add, IrnOp::Mul,
+
+		IrnOp::BitAnd, IrnOp::BitOr, IrnOp::BitXor,
+
+		IrnOp::Eq);
+}
+
+bool IrNode::is_compare() const
+{
+	return any_irnop_matches(op, IrnOp::Eq, 
+		IrnOp::UnsgnGt, IrnOp::UnsgnGe,
+		IrnOp::SgnGt, IrnOp::SgnGe);
+}
+
+bool IrNode::is_ldst_32() const
+{
+	return any_irnop_matches(op, IrnOp::Ldu32, IrnOp::Ldu32x,
+		IrnOp::Lds32, IrnOp::Lds32x,
+		IrnOp::St32);
+}
+bool IrNode::is_ldst_16() const
+{
+	return any_irnop_matches(op, IrnOp::Ldu16, IrnOp::Ldu16x,
+		IrnOp::Lds16, IrnOp::Lds16x,
+		IrnOp::St16);
+}
+bool IrNode::is_ldst_8() const
+{
+	return any_irnop_matches(op, IrnOp::Ldu8, IrnOp::Ldu8x,
+		IrnOp::Lds8, IrnOp::Lds8x,
+		IrnOp::St8);
+}
+
+bool IrNode::is_ldop() const
+{
+	return any_irnop_matches(op, IrnOp::Ldu32, IrnOp::Ldu16, IrnOp::Ldu8,
+		IrnOp::Lds32, IrnOp::Lds16, IrnOp::Lds8);
+}
+bool IrNode::is_ldxop() const
+{
+	return any_irnop_matches(op, 
+		IrnOp::Ldu32x, IrnOp::Ldu16x, IrnOp::Ldu8x,
+		IrnOp::Lds32x, IrnOp::Lds16x, IrnOp::Lds8x);
+}
+bool IrNode::is_stop() const
+{
+	return any_irnop_matches(op, IrnOp::St32, IrnOp::St16, IrnOp::St8);
+}
+bool IrNode::is_stxop() const
+{
+	return any_irnop_matches(op, IrnOp::St32x, IrnOp::St16x, IrnOp::St8x);
+}
+
+
+bool IrNode::is_unsigned_ldop() const
+{
+	return any_irnop_matches(op, IrnOp::Ldu32, IrnOp::Ldu16, IrnOp::Ldu8);
+}
+bool IrNode::is_signed_ldop() const
+{
+	return any_irnop_matches(op, IrnOp::Lds32, IrnOp::Lds16, IrnOp::Lds8);
+}
+bool IrNode::is_unsigned_ldxop() const
+{
+	return any_irnop_matches(op, 
+		IrnOp::Ldu32x, IrnOp::Ldu16x, IrnOp::Ldu8x);
+}
+bool IrNode::is_signed_ldxop() const
+{
+	return any_irnop_matches(op, 
+		IrnOp::Lds32x, IrnOp::Lds16x, IrnOp::Lds8x);
+}
+
 IrCode::IrCode()
 {
 	head.next = &head;
@@ -72,6 +162,142 @@ void IrCode::rmirn(IrNode* irn)
 	delete irn;
 }
 
+IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_binop())
+	{
+		printerr("IrCode::mk_binop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->irnarg[0] = a;
+	p->irnarg[1] = b;
+
+	return p;
+}
+
+IrNode* IrCode::mk_ldop(IrnOp op, Var* varg)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_ldop())
+	{
+		printerr("IrCode::mk_ldop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+
+	return p;
+}
+IrNode* IrCode::mk_ldxop(IrnOp op, Var* varg, IrNode* irn0)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_ldxop())
+	{
+		printerr("IrCode::mk_ldxop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[0] = irn0;
+
+	return p;
+}
+IrNode* IrCode::mk_stop(IrnOp op, Var* varg, IrNode* irn1)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_stop())
+	{
+		printerr("IrCode::mk_stop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[1] = irn1;
+
+	return p;
+}
+IrNode* IrCode::mk_stxop(IrnOp op, Var* varg, IrNode* irn0, IrNode* irn1)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_stxop())
+	{
+		printerr("IrCode::mk_stxop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[0] = irn0;
+	p->irnarg[1] = irn1;
+
+	return p;
+}
+
+IrNode* IrCode::mk_const(s64 val)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::Const;
+	p->carg = val;
+
+	return p;
+}
+IrNode* IrCode::mk_lab(s64 val)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::Lab;
+	p->larg[0] = val;
+
+	return p;
+}
+IrNode* IrCode::mk_sel(IrNode* dst, s64 lab0, s64 lab1)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::Sel;
+	p->irnarg[0] = dst;
+	p->larg[0] = lab0;
+	p->larg[1] = lab1;
+
+	return p;
+}
+IrNode* IrCode::mk_kill(Var* varg)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::Kill;
+	p->varg = varg;
+
+	return p;
+}
 
 std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 {
@@ -130,11 +356,17 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 		case IrnOp::Mul:
 			print_binop("mul");
 			break;
-		case IrnOp::Div:
-			print_binop("div");
+		case IrnOp::UnsgnDiv:
+			print_binop("udiv");
 			break;
-		case IrnOp::Mod:
-			print_binop("mod");
+		case IrnOp::UnsgnMod:
+			print_binop("umod");
+			break;
+		case IrnOp::SgnDiv:
+			print_binop("sdiv");
+			break;
+		case IrnOp::SgnMod:
+			print_binop("smod");
 			break;
 
 		// Save this for later
@@ -148,11 +380,6 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 			break;
 		case IrnOp::BitXor:
 			print_binop("bitxor");
-			break;
-		case IrnOp::BitNot:
-			osprintout(os, "bitnot(");
-			osprintout(os, ir_to_index(p->irnarg[0]));
-			osprintout(os, ")");
 			break;
 
 
@@ -178,16 +405,25 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 			print_binop("eq");
 			break;
 
-		// >
-		case IrnOp::Gt:
-			print_binop("gt");
+		// Unsigned >
+		case IrnOp::UnsgnGt:
+			print_binop("ugt");
 			break;
 
-		// >=
-		case IrnOp::Ge:
-			print_binop("ge");
+		// Unsigned >=
+		case IrnOp::UnsgnGe:
+			print_binop("uge");
 			break;
 
+		// Signed >
+		case IrnOp::SgnGt:
+			print_binop("sgt");
+			break;
+
+		// Signed >=
+		case IrnOp::SgnGe:
+			print_binop("sge");
+			break;
 
 
 		// ldu32op
