@@ -20,11 +20,15 @@
 
 flame_plus_plus::Compiler compiler;
 
+void test_ir_code();
+
 
 int main(int argc, char** argv)
 {
-	compiler.init(argc, argv);
-	return compiler();
+	//compiler.init(argc, argv);
+	//return compiler();
+
+	test_ir_code();
 
 	return 0;
 }
@@ -56,3 +60,31 @@ int main(int argc, char** argv)
 //
 //	test.debug_print();
 //}
+
+
+void test_ir_code()
+{
+	using namespace flame_plus_plus;
+
+	IrCode code;
+
+	auto node0 = code.mkirn();
+	auto node1 = code.mkirn();
+	auto node2 = code.mkirn();
+
+	node0->op = IrnOp::Const;
+	node0->carg = 9000;
+
+	node1->op = IrnOp::Const;
+	node1->carg = 74;
+
+	node2->op = IrnOp::Add;
+	node2->irnarg[0] = node0;
+	node2->irnarg[1] = node1;
+
+	for (auto irn=code.head.next; irn!=&code.head; irn=irn->next)
+	{
+		code.osprint_irn(cout, irn);
+		printout("\n");
+	}
+}

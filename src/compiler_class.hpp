@@ -23,9 +23,13 @@
 #include "lexer_class.hpp"
 #include "var_class.hpp"
 //#include "code_generator_class.hpp"
+#include "irnode_stuff.hpp"
 
 namespace flame_plus_plus
 {
+
+
+
 
 class Compiler
 {
@@ -39,6 +43,11 @@ private:		// variables
 
 	int __argc;
 	char** __argv;
+
+
+	size_t __last_lab = 0;
+
+	IrCode __code;
 
 
 
@@ -58,6 +67,8 @@ private:		// functions
 	gen_getter_by_val(line_num);
 	gen_getter_by_val(argc);
 	gen_getter_by_val(argv);
+	gen_getter_and_setter_by_val(last_lab);
+	gen_getter_by_ref(code);
 
 	inline void lex()
 	{
@@ -94,7 +105,11 @@ private:		// functions
 
 	inline auto scope_lev() const
 	{
-		return __sym_tbl.cur_lev();
+		return __sym_tbl.scope_lev();
+	}
+	inline auto scope_num() const
+	{
+		return __sym_tbl.scope_num();
 	}
 
 
@@ -120,19 +135,29 @@ private:		// functions
 	bool parse_scope(bool just_test=false);
 
 	bool parse_one_statement(bool just_test=false);
+	bool parse_one_loop_statement(bool just_test=false);
+
+
 	bool parse_var_decl(bool just_test=false);
-	bool parse_non_var_decl_statements(bool just_test=false);
+	bool parse_non_var_decl_statement(bool just_test=false);
+	bool parse_non_var_decl_loop_statement(bool just_test=false);
 
 	bool parse_while_loop_stmt(bool just_test=false);
 	bool parse_if_stmt(bool just_test=false);
 	bool parse_if_stmt_head(bool just_test=false);
 	bool parse_else_stmt(bool just_test=false);
+	bool parse_break_stmt(bool just_test=false);
+	bool parse_continue_stmt(bool just_test=false);
+
 	bool parse_assignment_stmt(bool just_test=false);
 
-	void parse_expr_regular();
-	void parse_expr();
-	void parse_term();
-	void parse_factor();
+
+
+
+	IrNode* parse_expr_regular();
+	IrNode* parse_expr();
+	IrNode* parse_term();
+	IrNode* parse_factor();
 
 
 };

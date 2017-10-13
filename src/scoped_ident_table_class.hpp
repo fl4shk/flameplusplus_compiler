@@ -40,6 +40,10 @@ public:		// typedefs and constants
 private:		// variables
 	std::vector<OneLevelTable> __table;
 
+
+	// The number of scopes that have been made - 1
+	s64 __scope_num = -1;
+
 	
 
 public:		// functions
@@ -51,17 +55,26 @@ public:		// functions
 	void make_scope() __attribute__((noinline))
 	{
 		table().push_back(OneLevelTable());
+		++__scope_num;
+
+		if (scope_num() < 0)
+		{
+			printerr("ScopedIdentTable::make_scope():  ",
+				"Far, FAR too many scopes!\n");
+			exit(1);
+		}
 	}
 
 	void del_scope() __attribute__((noinline))
 	{
-		if (cur_lev() > builtin_scope_level)
+		if (scope_lev() > builtin_scope_level)
 		{
 			table().pop_back();
 		}
 		else
 		{
 			printerr("ScopedIdentTable::del_scope():  Eek!\n");
+			exit(1);
 		}
 	}
 
@@ -76,11 +89,11 @@ public:		// functions
 
 	inline void insert_or_assign(const Type& to_insert_or_assign)
 	{
-		at(cur_lev()).insert_or_assign(to_insert_or_assign);
+		at(scope_lev()).insert_or_assign(to_insert_or_assign);
 	}
 	inline void insert_or_assign(Type&& to_insert_or_assign)
 	{
-		at(cur_lev()).insert_or_assign(std::move(to_insert_or_assign));
+		at(scope_lev()).insert_or_assign(std::move(to_insert_or_assign));
 	}
 
 	inline void insert_or_assign(size_t level, 
@@ -103,7 +116,7 @@ public:		// functions
 			return &table().at(builtin_scope_level).at(some_name);
 		}
 
-		for (s64 i=cur_lev(); i>=builtin_scope_level; --i)
+		for (s64 i=scope_lev(); i>=builtin_scope_level; --i)
 		{
 			if (table().at(i).contains(some_name))
 			{
@@ -126,10 +139,12 @@ public:		// functions
 
 	gen_getter_by_con_ref(table);
 	gen_getter_by_ref(table);
-	inline s64 cur_lev() const
+	inline s64 scope_lev() const
 	{
 		return (table().size() - 1);
 	}
+
+	gen_getter_by_val(scope_num);
 };
 
 }

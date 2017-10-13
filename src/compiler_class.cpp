@@ -109,9 +109,9 @@ void Compiler::parse_statements()
 		{
 			parse_var_decl();
 		}
-		while (parse_non_var_decl_statements(true))
+		while (parse_non_var_decl_statement(true))
 		{
-			parse_non_var_decl_statements();
+			parse_non_var_decl_statement();
 		}
 	}
 }
@@ -163,11 +163,11 @@ bool Compiler::parse_one_statement(bool just_test)
 		}
 		return true;
 	}
-	else if (parse_non_var_decl_statements(true))
+	else if (parse_non_var_decl_statement(true))
 	{
 		if (!just_test)
 		{
-			parse_non_var_decl_statements();
+			parse_non_var_decl_statement();
 		}
 		return true;
 	}
@@ -214,7 +214,8 @@ bool Compiler::parse_var_decl(bool just_test)
 	sym->set_type(SymType::VarName);
 
 	// No arrays for now
-	var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(), 0));
+	var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(), scope_num(),
+		0));
 
 	lex();
 	}
@@ -232,7 +233,8 @@ bool Compiler::parse_var_decl(bool just_test)
 		sym->set_type(SymType::VarName);
 
 		// No arrays for now
-		var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(), 0));
+		var_tbl().insert_or_assign(Var(type_sym, sym, scope_lev(),
+			scope_num(), 0));
 
 		lex();
 	}
@@ -241,7 +243,7 @@ bool Compiler::parse_var_decl(bool just_test)
 }
 
 
-bool Compiler::parse_non_var_decl_statements(bool just_test)
+bool Compiler::parse_non_var_decl_statement(bool just_test)
 {
 	if (parse_while_loop_stmt(true))
 	{
@@ -271,7 +273,7 @@ bool Compiler::parse_non_var_decl_statements(bool just_test)
 	{
 		if (!just_test)
 		{
-			we().err("parse_non_var_decl_statements():  Unexpected token");
+			we().err("parse_non_var_decl_statement():  Unexpected token");
 		}
 		return false;
 	}
@@ -295,45 +297,17 @@ bool Compiler::parse_while_loop_stmt(bool just_test)
 }
 bool Compiler::parse_if_stmt(bool just_test)
 {
-	if (parse_if_stmt_head(true))
-	{
-		if (!just_test)
-		{
-			parse_if_stmt_head();
-		}
-		return true;
-	}
-	else
-	{
-		if (!just_test)
-		{
-			we().err("parse_if_stmt():  Unexpected token");
-		}
-		return false;
-	}
 }
 bool Compiler::parse_if_stmt_head(bool just_test)
 {
-	if (next_tok() != &Tok::If)
-	{
-		if (!just_test)
-		{
-			we().err("parse_if_stmt_head():  Unexpected token");
-		}
-		return false;
-	}
-	if (just_test)
-	{
-		return true;
-	}
-
-	lex();
-	match(&Tok::LParen);
-	parse_expr();
-	match(&Tok::RParen);
-	parse_scope();
 }
 bool Compiler::parse_else_stmt(bool just_test)
+{
+}
+bool Compiler::parse_break_stmt(bool just_test)
+{
+}
+bool Compiler::parse_continue_stmt(bool just_test)
 {
 }
 bool Compiler::parse_assignment_stmt(bool just_test)
@@ -341,17 +315,22 @@ bool Compiler::parse_assignment_stmt(bool just_test)
 }
 
 
-void Compiler::parse_expr_regular()
+
+IrNode* Compiler::parse_expr_regular()
 {
+	return nullptr;
 }
-void Compiler::parse_expr()
+IrNode* Compiler::parse_expr()
 {
+	return nullptr;
 }
-void Compiler::parse_term()
+IrNode* Compiler::parse_term()
 {
+	return nullptr;
 }
-void Compiler::parse_factor()
+IrNode* Compiler::parse_factor()
 {
+	return nullptr;
 }
 
 }

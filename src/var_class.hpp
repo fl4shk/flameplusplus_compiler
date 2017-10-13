@@ -41,8 +41,11 @@ private:		// variables (inside the Var class... yay!)
 
 
 	// Scope level of this variable's symbol (must be greater than 0 for
-	// variables)
+	// variables), as in, how deep we are
 	s64 __scope_lev = 1;
+
+	// Which scope number?
+	s64 __scope_num = 1;
 
 
 	// Array dimensions (0 if not an array)
@@ -54,7 +57,7 @@ public:		// functions
 	}
 
 	inline Var(Symbol* s_type_sym, Symbol* s_sym, s64 s_scope_lev,
-		size_t s_dim) 
+		s64 s_scope_num, size_t s_dim) 
 		: __type_sym(s_type_sym), __sym(s_sym),
 		__scope_lev(s_scope_lev), __dim(s_dim)
 	{
@@ -79,6 +82,7 @@ public:		// functions
 	gen_getter_and_setter_by_val(type_sym);
 	gen_getter_and_setter_by_val(sym);
 	gen_getter_and_setter_by_val(scope_lev);
+	gen_getter_and_setter_by_val(scope_num);
 	gen_getter_and_setter_by_val(dim);
 
 };
