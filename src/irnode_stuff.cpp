@@ -162,7 +162,7 @@ void IrCode::rmirn(IrNode* irn)
 	delete irn;
 }
 
-IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b)
+IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b, bool unsgn)
 {
 	{
 	IrNode temp;
@@ -223,7 +223,7 @@ IrNode* IrCode::mk_lognot(IrNode* irn0)
 
 IrNode* IrCode::mk_noteq(IrNode* a, IrNode* b)
 {
-	IrNode* p = mk_binop(IrnOp::Eq, a, b);
+	IrNode* p = mk_binop(IrnOp::Eq, a, b, true);
 	p = mk_lognot(p);
 	return p;
 }
@@ -232,14 +232,14 @@ IrNode* IrCode::mk_logand(IrNode* a, IrNode* b)
 	IrNode* p = mk_noteq(a, mk_const(0));
 	IrNode* q = mk_noteq(b, mk_const(0));
 
-	return mk_binop(IrnOp::BitAnd, p, q);
+	return mk_binop(IrnOp::BitAnd, p, q, true);
 }
 IrNode* IrCode::mk_logor(IrNode* a, IrNode* b)
 {
 	IrNode* p = mk_noteq(a, mk_const(0));
 	IrNode* q = mk_noteq(b, mk_const(0));
 
-	return mk_binop(IrnOp::BitOr, p, q);
+	return mk_binop(IrnOp::BitOr, p, q, true);
 }
 
 IrNode* IrCode::mk_ldop(IrnLoadType ldtyp, Var* varg)

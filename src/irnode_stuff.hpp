@@ -337,7 +337,7 @@ public:		// functions
 	IrNode* mkirn();
 	void rmirn(IrNode* irn);
 
-	IrNode* mk_binop(IrnOp op, IrNode* a, IrNode* b);
+	IrNode* mk_binop(IrnOp op, IrNode* a, IrNode* b, bool unsgn);
 	IrNode* mk_negate(IrNode* irn0);
 	IrNode* mk_bitnot(IrNode* irn0);
 	IrNode* mk_lognot(IrNode* irn0);
