@@ -199,85 +199,118 @@ IrNode* IrCode::mk_bitnot(IrNode* irn0)
 	return p;
 }
 
-IrNode* IrCode::mk_ldop(IrnOp op, Var* varg)
+IrNode* IrCode::mk_ldop(IrnLoadType ldtyp, Var* varg)
 {
+	switch (ldtyp)
 	{
-	IrNode temp;
-	temp.op = op;
+		case IrnLoadType::LdUnsgn8:
+			return __mk_ldop(IrnOp::Ldu8, varg);
+			break;
 
-	if (!temp.is_ldop())
-	{
-		printerr("IrCode::mk_ldop():  Eek!\n");
-		exit(1);
+		case IrnLoadType::LdUnsgn16:
+			return __mk_ldop(IrnOp::Ldu16, varg);
+			break;
+
+		case IrnLoadType::LdUnsgn32:
+			return __mk_ldop(IrnOp::Ldu32, varg);
+			break;
+
+		case IrnLoadType::LdSgn8:
+			return __mk_ldop(IrnOp::Lds8, varg);
+			break;
+
+		case IrnLoadType::LdSgn16:
+			return __mk_ldop(IrnOp::Lds16, varg);
+			break;
+
+		case IrnLoadType::LdSgn32:
+			return __mk_ldop(IrnOp::Lds32, varg);
+			break;
+
+		default:
+			printerr("IrCode::mk_ldop():  Eek!\n");
+			exit(1);
+			break;
 	}
-	}
-
-	IrNode* p = mkirn();
-	p->op = op;
-	p->varg = varg;
-
-	return p;
 }
-IrNode* IrCode::mk_ldxop(IrnOp op, Var* varg, IrNode* irn0)
+IrNode* IrCode::mk_ldxop(IrnLoadType ldtyp, Var* varg, IrNode* irn0)
 {
+	switch (ldtyp)
 	{
-	IrNode temp;
-	temp.op = op;
+		case IrnLoadType::LdUnsgn8:
+			return __mk_ldxop(IrnOp::Ldu8x, varg, irn0);
+			break;
 
-	if (!temp.is_ldxop())
-	{
-		printerr("IrCode::mk_ldxop():  Eek!\n");
-		exit(1);
+		case IrnLoadType::LdUnsgn16:
+			return __mk_ldxop(IrnOp::Ldu16x, varg, irn0);
+			break;
+
+		case IrnLoadType::LdUnsgn32:
+			return __mk_ldxop(IrnOp::Ldu32x, varg, irn0);
+			break;
+
+		case IrnLoadType::LdSgn8:
+			return __mk_ldxop(IrnOp::Lds8x, varg, irn0);
+			break;
+
+		case IrnLoadType::LdSgn16:
+			return __mk_ldxop(IrnOp::Lds16x, varg, irn0);
+			break;
+
+		case IrnLoadType::LdSgn32:
+			return __mk_ldxop(IrnOp::Lds32x, varg, irn0);
+			break;
+
+		default:
+			printerr("IrCode::mk_ldxop():  Eek!\n");
+			exit(1);
+			break;
 	}
-	}
-
-	IrNode* p = mkirn();
-	p->op = op;
-	p->varg = varg;
-	p->irnarg[0] = irn0;
-
-	return p;
 }
-IrNode* IrCode::mk_stop(IrnOp op, Var* varg, IrNode* irn1)
+IrNode* IrCode::mk_stop(IrnStoreType sttyp, Var* varg, IrNode* irn1)
 {
+	switch (sttyp)
 	{
-	IrNode temp;
-	temp.op = op;
+		case IrnStoreType::St8:
+			return __mk_stop(IrnOp::St8, varg, irn1);
+			break;
 
-	if (!temp.is_stop())
-	{
-		printerr("IrCode::mk_stop():  Eek!\n");
-		exit(1);
+		case IrnStoreType::St16:
+			return __mk_stop(IrnOp::St16, varg, irn1);
+			break;
+
+		case IrnStoreType::St32:
+			return __mk_stop(IrnOp::St32, varg, irn1);
+			break;
+
+		default:
+			printerr("IrCode::mk_stop():  Eek!\n");
+			exit(1);
+			break;
 	}
-	}
-
-	IrNode* p = mkirn();
-	p->op = op;
-	p->varg = varg;
-	p->irnarg[1] = irn1;
-
-	return p;
 }
-IrNode* IrCode::mk_stxop(IrnOp op, Var* varg, IrNode* irn0, IrNode* irn1)
+IrNode* IrCode::mk_stxop(IrnStoreType sttyp, Var* varg, IrNode* irn0, 
+	IrNode* irn1)
 {
+	switch (sttyp)
 	{
-	IrNode temp;
-	temp.op = op;
+		case IrnStoreType::St8:
+			return __mk_stxop(IrnOp::St8x, varg, irn0, irn1);
+			break;
 
-	if (!temp.is_stxop())
-	{
-		printerr("IrCode::mk_stxop():  Eek!\n");
-		exit(1);
+		case IrnStoreType::St16:
+			return __mk_stxop(IrnOp::St16x, varg, irn0, irn1);
+			break;
+
+		case IrnStoreType::St32:
+			return __mk_stxop(IrnOp::St32x, varg, irn0, irn1);
+			break;
+
+		default:
+			printerr("IrCode::mk_stxop():  Eek!\n");
+			exit(1);
+			break;
 	}
-	}
-
-	IrNode* p = mkirn();
-	p->op = op;
-	p->varg = varg;
-	p->irnarg[0] = irn0;
-	p->irnarg[1] = irn1;
-
-	return p;
 }
 
 IrNode* IrCode::mk_const(s64 val)
@@ -584,6 +617,88 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 	}
 
 	return os;
+}
+
+
+IrNode* IrCode::__mk_ldop(IrnOp op, Var* varg)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_ldop())
+	{
+		printerr("IrCode::__mk_ldop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+
+	return p;
+}
+IrNode* IrCode::__mk_ldxop(IrnOp op, Var* varg, IrNode* irn0)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_ldxop())
+	{
+		printerr("IrCode::__mk_ldxop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[0] = irn0;
+
+	return p;
+}
+IrNode* IrCode::__mk_stop(IrnOp op, Var* varg, IrNode* irn1)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_stop())
+	{
+		printerr("IrCode::__mk_stop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[1] = irn1;
+
+	return p;
+}
+IrNode* IrCode::__mk_stxop(IrnOp op, Var* varg, IrNode* irn0, IrNode* irn1)
+{
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_stxop())
+	{
+		printerr("IrCode::__mk_stxop():  Eek!\n");
+		exit(1);
+	}
+	}
+
+	IrNode* p = mkirn();
+	p->op = op;
+	p->varg = varg;
+	p->irnarg[0] = irn0;
+	p->irnarg[1] = irn1;
+
+	return p;
 }
 
 }

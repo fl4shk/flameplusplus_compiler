@@ -157,6 +157,24 @@ enum class IrnOp
 	Unknown
 };
 
+enum class IrnLoadType
+{
+	LdUnsgn8,
+	LdUnsgn16,
+	LdUnsgn32,
+
+	LdSgn8,
+	LdSgn16,
+	LdSgn32,
+};
+
+enum class IrnStoreType
+{
+	St8,
+	St16,
+	St32,
+};
+
 
 
 inline bool any_irnop_matches(IrnOp op)
@@ -210,6 +228,29 @@ public:		// functions
 	{
 		init_array(irnarg, nullptr, nullptr);
 		init_array(larg, blank_int_val, blank_int_val);
+	}
+
+
+	inline IrNode* get_store_src()
+	{
+		return irnarg[0];
+	}
+	inline IrNode* get_ldxstx_index()
+	{
+		return irnarg[1];
+	}
+
+	inline IrNode* get_sel_cmp()
+	{
+		return irnarg[0];
+	}
+	inline s64& get_sel_nonzero_dst()
+	{
+		return larg[0];
+	}
+	inline s64& get_sel_zero_dst()
+	{
+		return larg[1];
 	}
 
 	bool is_binop() const;
@@ -295,10 +336,12 @@ public:		// functions
 	IrNode* mk_negate(IrNode* irn0);
 	IrNode* mk_bitnot(IrNode* irn0);
 
-	IrNode* mk_ldop(IrnOp op, Var* varg);
-	IrNode* mk_ldxop(IrnOp op, Var* varg, IrNode* irn0);
-	IrNode* mk_stop(IrnOp op, Var* varg, IrNode* irn1);
-	IrNode* mk_stxop(IrnOp op, Var* varg, IrNode* irn0, IrNode* irn1);
+	IrNode* mk_ldop(IrnLoadType ldtyp, Var* varg);
+	IrNode* mk_ldxop(IrnLoadType ldtyp, Var* varg, IrNode* irn0);
+	IrNode* mk_stop(IrnStoreType sttyp, Var* varg, IrNode* irn1);
+	IrNode* mk_stxop(IrnStoreType sttyp, Var* varg, IrNode* irn0, 
+		IrNode* irn1);
+
 
 
 	IrNode* mk_const(s64 val);
@@ -330,6 +373,11 @@ private:		// functions
 		old_next->prev = irn;
 	}
 
+
+	IrNode* __mk_ldop(IrnOp op, Var* varg);
+	IrNode* __mk_ldxop(IrnOp op, Var* varg, IrNode* irn0);
+	IrNode* __mk_stop(IrnOp op, Var* varg, IrNode* irn1);
+	IrNode* __mk_stxop(IrnOp op, Var* varg, IrNode* irn0, IrNode* irn1);
 };
 
 }
