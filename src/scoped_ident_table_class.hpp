@@ -37,8 +37,10 @@ public:		// typedefs and constants
 	static constexpr s64 builtin_scope_level = 0;
 	static constexpr s64 not_found_level = builtin_scope_level - 1;
 
-private:		// variables
+protected:		// variables
 	std::vector<OneLevelTable> __table;
+
+	std::vector<OneLevelTable> __old_table;
 
 
 	// The number of scopes that have been made - 1
@@ -69,6 +71,7 @@ public:		// functions
 	{
 		if (scope_lev() > builtin_scope_level)
 		{
+			__old_table.push_back(std::move(table().back()));
 			table().pop_back();
 		}
 		else

@@ -100,6 +100,20 @@ public:		// functions
 			}
 		}
 	}
+
+	void debug_print_old() __attribute__((noinline))
+	{
+		for (size_t i=0; i<__old_table.size(); ++i)
+		{
+			auto& outer_iter = __old_table.at(i);
+			for (const auto& inner_iter : outer_iter.table())
+			{
+				printout("level ", i, ":  \"", inner_iter.first, "\":  ", 
+					inner_iter.second.tok()->str(), ", ", 
+					inner_iter.second.type(), "\n");
+			}
+		}
+	}
 };
 
 }

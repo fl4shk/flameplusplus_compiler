@@ -20,6 +20,7 @@
 
 flame_plus_plus::Compiler compiler;
 
+void test_symbol_table();
 
 
 int main(int argc, char** argv)
@@ -27,36 +28,46 @@ int main(int argc, char** argv)
 	compiler.init(argc, argv);
 	return compiler();
 
-	//return 0;
+	//test_symbol_table();
 }
 
 
-//void test_symbol_table()
-//{
-//	using namespace flame_plus_plus;
-//
-//
-//	SymbolTable test;
-//	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
-//
-//
-//	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
-//
-//
-//	test.make_scope();
-//	test.make_scope();
-//	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
-//
-//	test.debug_print();
-//
-//	printout("\n");
-//
-//	test.del_scope();
-//	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
-//
-//
-//	test.debug_print();
-//}
+void test_symbol_table()
+{
+	using namespace flame_plus_plus;
+
+
+	SymbolTable test;
+	test.insert_or_assign(Symbol(&Tok::While, SymType::Keyword));
+
+
+	test.insert_or_assign(Symbol(&Tok::U8, SymType::BuiltinTypename));
+
+
+	test.make_scope();
+	test.make_scope();
+	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+
+	printout("\nRemaining:  \n");
+	test.debug_print();
+	printout("\nOld:  \n");
+	test.debug_print_old();
+
+	printout("\n");
+
+	Symbol* aaaaa = test.find("aaaaa"); 
+	printout("before del_scope():  ", &aaaaa->name(), "\n");
+
+	test.del_scope();
+	test.insert_or_assign(Symbol("aaaaa", &Tok::Ident, SymType::VarName));
+
+	printout("after del_scope():  ", &aaaaa->name(), "\n");
+
+	printout("\nRemaining:  \n");
+	test.debug_print();
+	printout("\nOld:  \n");
+	test.debug_print_old();
+}
 
 
 //void test_ir_code()
