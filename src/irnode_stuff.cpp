@@ -182,6 +182,22 @@ IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b)
 
 	return p;
 }
+IrNode* IrCode::mk_negate(IrNode* irn0)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::Negate;
+	p->irnarg[0] = irn0;
+
+	return p;
+}
+IrNode* IrCode::mk_bitnot(IrNode* irn0)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::BitNot;
+	p->irnarg[0] = irn0;
+
+	return p;
+}
 
 IrNode* IrCode::mk_ldop(IrnOp op, Var* varg)
 {
@@ -353,6 +369,11 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 		case IrnOp::Sub:
 			print_binop("sub");
 			break;
+		case IrnOp::Negate:
+			osprintout(os, "neg(");
+			osprintout(os, ir_to_index(p->irnarg[0]));
+			osprintout(os, ")");
+			break;
 		case IrnOp::Mul:
 			print_binop("mul");
 			break;
@@ -380,6 +401,12 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 			break;
 		case IrnOp::BitXor:
 			print_binop("bitxor");
+			break;
+
+		case IrnOp::BitNot:
+			osprintout(os, "bitnot(");
+			osprintout(os, ir_to_index(p->irnarg[0]));
+			osprintout(os, ")");
 			break;
 
 

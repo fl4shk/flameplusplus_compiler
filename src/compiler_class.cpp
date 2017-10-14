@@ -351,8 +351,23 @@ IrNode* Compiler::__parse_expr_regular()
 	{
 		lex();
 
-		ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
+		//ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
+		//	__parse_term());
+		ret = code().mk_negate(__parse_term());
+	}
+	else if (next_tok() == &Tok::BitNot)
+	{
+		lex();
+
+		ret = code().mk_bitnot(__parse_term());
+	}
+	else if (next_tok() == &Tok::LogNot)
+	{
+		lex();
+
+		ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
 			__parse_term());
+		ret = code().mk_bitnot(ret);
 	}
 	else
 	{
@@ -448,6 +463,8 @@ IrNode* Compiler::__parse_factor()
 	}
 	//else if (next_tok() == &Tok::Ident)
 	//{
+
+	//	lex();
 	//}
 
 	else if (next_tok() == &Tok::LParen)

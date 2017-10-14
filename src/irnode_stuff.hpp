@@ -31,6 +31,7 @@ enum class IrnOp
 {
 	Add,
 	Sub,
+	Negate,
 	Mul,
 	UnsgnDiv,
 	UnsgnMod,
@@ -44,6 +45,9 @@ enum class IrnOp
 	BitAnd,
 	BitOr,
 	BitXor,
+
+
+	BitNot,
 
 
 	// Logical shift left
@@ -288,6 +292,8 @@ public:		// functions
 	void rmirn(IrNode* irn);
 
 	IrNode* mk_binop(IrnOp op, IrNode* a, IrNode* b);
+	IrNode* mk_negate(IrNode* irn0);
+	IrNode* mk_bitnot(IrNode* irn0);
 
 	IrNode* mk_ldop(IrnOp op, Var* varg);
 	IrNode* mk_ldxop(IrnOp op, Var* varg, IrNode* irn0);
