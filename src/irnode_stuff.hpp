@@ -76,6 +76,12 @@ enum class IrnOp
 	// Signed >=
 	SgnGe,
 
+	// &&
+	LogAnd,
+
+	// ||
+	LogOr,
+
 
 
 	// ldu32op

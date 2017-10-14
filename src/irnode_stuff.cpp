@@ -33,7 +33,9 @@ bool IrNode::is_binop() const
 
 		IrnOp::Eq, 
 		IrnOp::UnsgnGt, IrnOp::UnsgnGe, 
-		IrnOp::SgnGt, IrnOp::SgnGe);
+		IrnOp::SgnGt, IrnOp::SgnGe,
+		
+		IrnOp::LogAnd, IrnOp::LogOr);
 }
 
 bool IrNode::is_commutative_binop() const
@@ -485,6 +487,15 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 			print_binop("sge");
 			break;
 
+		// &&
+		case IrnOp::LogAnd:
+			print_binop("logand");
+			break;
+
+		// ||
+		case IrnOp::LogOr:
+			print_binop("logor");
+			break;
 
 		// ldu32op
 		case IrnOp::Ldu32:

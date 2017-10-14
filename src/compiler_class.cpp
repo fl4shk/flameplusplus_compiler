@@ -345,13 +345,13 @@ IrNode* Compiler::parse_expr(bool unsgn)
 
 		if (old_next_tok == &Tok::LogAnd)
 		{
-			ret = code().mk_binop(IrnOp::BitAnd, ret,
-				parse_expr(unsgn));
+			ret = code().mk_binop(IrnOp::LogAnd, ret,
+				__parse_expr_conditional(unsgn));
 		}
 		else if (old_next_tok == &Tok::LogOr)
 		{
-			ret = code().mk_binop(IrnOp::BitOr, ret,
-				parse_expr(unsgn));
+			ret = code().mk_binop(IrnOp::LogOr, ret,
+				__parse_expr_conditional(unsgn));
 		}
 	}
 
@@ -375,12 +375,12 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 		if (old_next_tok == &Tok::CmpEq)
 		{
 			ret = code().mk_binop(IrnOp::Eq, ret,
-				__parse_expr_conditional(unsgn));
+				__parse_expr_regular(unsgn));
 		}
 		else if (old_next_tok == &Tok::CmpNe)
 		{
 			ret = code().mk_binop(IrnOp::Eq, ret,
-				__parse_expr_conditional(unsgn));
+				__parse_expr_regular(unsgn));
 			ret = code().mk_bitnot(ret);
 		}
 		else if (old_next_tok == &Tok::CmpLt)
@@ -388,12 +388,12 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGt, 
-					__parse_expr_conditional(unsgn), ret);
+					__parse_expr_regular(unsgn), ret);
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGt, 
-					__parse_expr_conditional(unsgn), ret);
+					__parse_expr_regular(unsgn), ret);
 			}
 		}
 		else if (old_next_tok == &Tok::CmpLe)
@@ -401,12 +401,12 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGe, 
-					__parse_expr_conditional(unsgn), ret);
+					__parse_expr_regular(unsgn), ret);
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGe, 
-					__parse_expr_conditional(unsgn), ret);
+					__parse_expr_regular(unsgn), ret);
 			}
 		}
 		else if (old_next_tok == &Tok::CmpGt)
@@ -414,12 +414,12 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGt, ret,
-					__parse_expr_conditional(unsgn));
+					__parse_expr_regular(unsgn));
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGt, ret,
-					__parse_expr_conditional(unsgn));
+					__parse_expr_regular(unsgn));
 			}
 		}
 		else if (old_next_tok == &Tok::CmpGe)
@@ -427,12 +427,12 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGe, ret,
-					__parse_expr_conditional(unsgn));
+					__parse_expr_regular(unsgn));
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGe, ret,
-					__parse_expr_conditional(unsgn));
+					__parse_expr_regular(unsgn));
 			}
 		}
 	}
@@ -456,17 +456,15 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 		// __parse_term() doesn't handle leading terms
 		if (minus)
 		{
-			ret = code().mk_binop(IrnOp::Sub, ret, 
-				__parse_expr_regular(unsgn));
-			//printout("__parse_expr_regular():  Minus:  ");
+			ret = code().mk_binop(IrnOp::Sub, ret, __parse_term(unsgn));
+			//printout("__parse_term():  Minus:  ");
 			//code().osprint_irn(cout, ret);
 			//printout("\n");
 		}
 		else
 		{
-			ret = code().mk_binop(IrnOp::Add, ret, 
-				__parse_expr_regular(unsgn));
-			//printout("__parse_expr_regular():  Plus:  ");
+			ret = code().mk_binop(IrnOp::Add, ret, __parse_term(unsgn));
+			//printout("__parse_term():  Plus:  ");
 			//code().osprint_irn(cout, ret);
 			//printout("\n");
 		}
