@@ -335,11 +335,38 @@ IrNode* Compiler::parse_expr(bool unsgn)
 {
 	IrNode* ret = nullptr;
 
+	ret = __parse_expr_conditional(unsgn);
+
+	while (any_tok_matches(next_tok(), &Tok::LogAnd, &Tok::LogOr))
+	{
+		const auto old_next_tok = next_tok();
+
+		lex();
+
+		if (old_next_tok == &Tok::LogAnd)
+		{
+			ret = code().mk_binop(IrnOp::BitAnd, ret,
+				parse_expr(unsgn));
+		}
+		else if (old_next_tok == &Tok::LogOr)
+		{
+			ret = code().mk_binop(IrnOp::BitOr, ret,
+				parse_expr(unsgn));
+		}
+	}
+
+
+	return ret;
+}
+
+IrNode* Compiler::__parse_expr_conditional(bool unsgn)
+{
+	IrNode* ret = nullptr;
+
 	ret = __parse_expr_regular(unsgn);
 
 	while (any_tok_matches(next_tok(), &Tok::CmpEq, &Tok::CmpNe,
-		&Tok::CmpLt, &Tok::CmpLe, &Tok::CmpGt, &Tok::CmpGe, 
-		&Tok::LogAnd, &Tok::LogOr))
+		&Tok::CmpLt, &Tok::CmpLe, &Tok::CmpGt, &Tok::CmpGe))
 	{
 		const auto old_next_tok = next_tok();
 
@@ -348,12 +375,12 @@ IrNode* Compiler::parse_expr(bool unsgn)
 		if (old_next_tok == &Tok::CmpEq)
 		{
 			ret = code().mk_binop(IrnOp::Eq, ret,
-				__parse_expr_regular(unsgn));
+				__parse_expr_conditional(unsgn));
 		}
 		else if (old_next_tok == &Tok::CmpNe)
 		{
 			ret = code().mk_binop(IrnOp::Eq, ret,
-				__parse_expr_regular(unsgn));
+				__parse_expr_conditional(unsgn));
 			ret = code().mk_bitnot(ret);
 		}
 		else if (old_next_tok == &Tok::CmpLt)
@@ -361,12 +388,12 @@ IrNode* Compiler::parse_expr(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGt, 
-					__parse_expr_regular(unsgn), ret);
+					__parse_expr_conditional(unsgn), ret);
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGt, 
-					__parse_expr_regular(unsgn), ret);
+					__parse_expr_conditional(unsgn), ret);
 			}
 		}
 		else if (old_next_tok == &Tok::CmpLe)
@@ -374,12 +401,12 @@ IrNode* Compiler::parse_expr(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGe, 
-					__parse_expr_regular(unsgn), ret);
+					__parse_expr_conditional(unsgn), ret);
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGe, 
-					__parse_expr_regular(unsgn), ret);
+					__parse_expr_conditional(unsgn), ret);
 			}
 		}
 		else if (old_next_tok == &Tok::CmpGt)
@@ -387,12 +414,12 @@ IrNode* Compiler::parse_expr(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGt, ret,
-					__parse_expr_regular(unsgn));
+					__parse_expr_conditional(unsgn));
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGt, ret,
-					__parse_expr_regular(unsgn));
+					__parse_expr_conditional(unsgn));
 			}
 		}
 		else if (old_next_tok == &Tok::CmpGe)
@@ -400,81 +427,181 @@ IrNode* Compiler::parse_expr(bool unsgn)
 			if (!unsgn)
 			{
 				ret = code().mk_binop(IrnOp::SgnGe, ret,
-					__parse_expr_regular(unsgn));
+					__parse_expr_conditional(unsgn));
 			}
 			else
 			{
 				ret = code().mk_binop(IrnOp::UnsgnGe, ret,
-					__parse_expr_regular(unsgn));
+					__parse_expr_conditional(unsgn));
 			}
-		}
-		else if (old_next_tok == &Tok::LogAnd)
-		{
-			ret = code().mk_binop(IrnOp::BitAnd, ret,
-				__parse_expr_regular(unsgn));
-		}
-		else if (old_next_tok == &Tok::LogOr)
-		{
-			ret = code().mk_binop(IrnOp::BitOr, ret,
-				__parse_expr_regular(unsgn));
 		}
 	}
 
 	return ret;
 }
+
+
 IrNode* Compiler::__parse_expr_regular(bool unsgn)
 {
 	IrNode* ret = nullptr;
 
-	//if (next_tok() == &Tok::Plus)
-	//{
-	//	lex();
-	//}
-	//else if (next_tok() == &Tok::Minus)
-	//{
-	//	lex();
+	ret = __parse_expr_leading(unsgn);
 
-	//	//ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
-	//	//	__parse_term(unsgn);
-	//	ret = code().mk_negate(__parse_term(unsgn));
-	//}
-	//else if (next_tok() == &Tok::BitNot)
-	//{
-	//	lex();
-
-	//	ret = code().mk_bitnot(__parse_term(unsgn));
-	//}
-	//else if (next_tok() == &Tok::LogNot)
-	//{
-	//	lex();
-
-	//	ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
-	//		__parse_term(unsgn));
-	//	ret = code().mk_bitnot(ret);
-	//}
-	//else
-	//{
-	//	ret = __parse_term(unsgn);
-	//}
-
-	//while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
-	//{
-	//	const bool minus = (next_tok() == &Tok::Minus);
-
-	//	lex();
-
-	//	if (minus)
-	//	{
-	//		ret = code().mk_binop(IrnOp::Sub, ret, parse_expr(unsgn));
-	//	}
-	//	else
-	//	{
-	//		ret = code().mk_binop(IrnOp::Add, ret, parse_expr(unsgn));
-	//	}
-	//}
-
-
+	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
 	{
+		const bool minus = (next_tok() == &Tok::Minus);
+
+		lex();
+
+		// __parse_term() doesn't handle leading terms
+		if (minus)
+		{
+			ret = code().mk_binop(IrnOp::Sub, ret, 
+				__parse_expr_regular(unsgn));
+			//printout("__parse_expr_regular():  Minus:  ");
+			//code().osprint_irn(cout, ret);
+			//printout("\n");
+		}
+		else
+		{
+			ret = code().mk_binop(IrnOp::Add, ret, 
+				__parse_expr_regular(unsgn));
+			//printout("__parse_expr_regular():  Plus:  ");
+			//code().osprint_irn(cout, ret);
+			//printout("\n");
+		}
+	}
+
+
+	return ret;
+}
+
+IrNode* Compiler::__parse_term(bool unsgn)
+{
+	IrNode* ret = nullptr;
+
+	ret = __parse_factor(unsgn);
+
+	//const auto some_next_tok = some_parse_vec.at(index).next_tok;
+
+	while (any_tok_matches(next_tok(), &Tok::Mul, &Tok::Div, &Tok::Mod,
+		&Tok::BitAnd, &Tok::BitOr, &Tok::BitXor,
+		&Tok::BitShL, &Tok::BitShR))
+	{
+		const auto old_next_tok = next_tok();
+
+		lex();
+
+		if (old_next_tok == &Tok::Mul)
+		{
+			//ret *= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::Mul, ret, 
+				__parse_factor(unsgn));
+		}
+		else if (old_next_tok == &Tok::Div)
+		{
+			//ret /= __handle_factor(some_parse_vec, index);
+
+			if (!unsgn)
+			{
+				ret = code().mk_binop(IrnOp::SgnDiv, ret, 
+					__parse_factor(unsgn));
+			}
+			else
+			{
+				ret = code().mk_binop(IrnOp::UnsgnDiv, ret, 
+					__parse_factor(unsgn));
+			}
+		}
+		else if (old_next_tok == &Tok::Mod)
+		{
+			if (!unsgn)
+			{
+				ret = code().mk_binop(IrnOp::SgnMod, ret, 
+					__parse_factor(unsgn));
+			}
+			else
+			{
+				ret = code().mk_binop(IrnOp::UnsgnMod, ret, 
+					__parse_factor(unsgn));
+			}
+		}
+		else if (old_next_tok == &Tok::BitAnd)
+		{
+			ret = code().mk_binop(IrnOp::BitAnd, ret, 
+				__parse_factor(unsgn));
+		}
+		else if (old_next_tok == &Tok::BitOr)
+		{
+			ret = code().mk_binop(IrnOp::BitOr, ret, 
+				__parse_factor(unsgn));
+		}
+		else if (old_next_tok == &Tok::BitXor)
+		{
+			ret = code().mk_binop(IrnOp::BitXor, ret, 
+				__parse_factor(unsgn));
+		}
+		else if (old_next_tok == &Tok::BitShL)
+		{
+			ret = code().mk_binop(IrnOp::Lsl, ret, 
+				__parse_factor(unsgn));
+		}
+		else if (old_next_tok == &Tok::BitShR)
+		{
+			if (!unsgn)
+			{
+				ret = code().mk_binop(IrnOp::Asr, ret, 
+					__parse_factor(unsgn));
+			}
+			else
+			{
+				ret = code().mk_binop(IrnOp::Lsr, ret, 
+					__parse_factor(unsgn));
+			}
+		}
+	}
+	return ret;
+
+}
+IrNode* Compiler::__parse_factor(bool unsgn)
+{
+	IrNode* ret = nullptr;
+
+	if (next_tok() == &Tok::NatNum)
+	{
+		ret = code().mk_const(next_num());
+		lex();
+		return ret;
+	}
+	//else if (next_tok() == &Tok::Ident)
+	//{
+
+	//	lex();
+	//}
+
+	else if (next_tok() == &Tok::LParen)
+	{
+		lex();
+
+		ret = parse_expr(unsgn);
+
+		match(&Tok::RParen);
+	}
+	else
+	{
+		we().err("Invalid expression");
+	}
+
+
+	return ret;
+
+}
+
+
+IrNode* Compiler::__parse_expr_leading(bool unsgn)
+{
+	IrNode* ret = nullptr;
+
 	std::vector<PTok> leading_tok_vec;
 
 	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus,
@@ -483,19 +610,6 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 		leading_tok_vec.push_back(next_tok());
 		lex();
 	}
-
-
-	//for (const auto& tok : leading_tok_vec)
-	//for (s64 i=leading_tok_vec.size()-1; i>=0; --i)
-	//{
-	//	if (tok == &Tok::Plus)
-	//	{
-	//	}
-	//	else if (tok == &Tok::Minus)
-	//	{
-	//		ret = code().mk_negate(__parse_term(unsgn));
-	//	}
-	//}
 
 	if (leading_tok_vec.size() != 0)
 	{
@@ -545,154 +659,13 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 	else
 	{
 		ret = __parse_term(unsgn);
-	}
-
-
-	}
-
-	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
-	{
-		const bool minus = (next_tok() == &Tok::Minus);
-
-		lex();
-
-		// Need the full parse_expr() here because __parse_term doesn't
-		// handle leading terms
-		if (minus)
-		{
-			ret = code().mk_binop(IrnOp::Sub, ret, parse_expr(unsgn));
-		}
-		else
-		{
-			ret = code().mk_binop(IrnOp::Add, ret, parse_expr(unsgn));
-		}
+		//printout("Didn't find leading:  ");
+		//code().osprint_irn(cout, ret);
+		//printout("\n");
 	}
 
 
 	return ret;
-}
-IrNode* Compiler::__parse_term(bool unsgn)
-{
-	IrNode* ret = nullptr;
-
-	ret = __parse_factor(unsgn);
-
-	//const auto some_next_tok = some_parse_vec.at(index).next_tok;
-
-	while (any_tok_matches(next_tok(), &Tok::Mul, &Tok::Div, &Tok::Mod,
-		&Tok::BitAnd, &Tok::BitOr, &Tok::BitXor,
-		&Tok::BitShL, &Tok::BitShR))
-	{
-		const auto old_next_tok = next_tok();
-
-		lex();
-
-		if (old_next_tok == &Tok::Mul)
-		{
-			//ret *= __handle_factor(some_parse_vec, index);
-			ret = code().mk_binop(IrnOp::Mul, ret, __parse_factor(unsgn));
-		}
-		else if (old_next_tok == &Tok::Div)
-		{
-			//ret /= __handle_factor(some_parse_vec, index);
-
-			if (!unsgn)
-			{
-				ret = code().mk_binop(IrnOp::SgnDiv, ret, 
-					__parse_factor(unsgn));
-			}
-			else
-			{
-				ret = code().mk_binop(IrnOp::UnsgnDiv, ret, 
-					__parse_factor(unsgn));
-			}
-		}
-		else if (old_next_tok == &Tok::Mod)
-		{
-			if (!unsgn)
-			{
-				ret = code().mk_binop(IrnOp::SgnMod, ret, 
-					__parse_factor(unsgn));
-			}
-			else
-			{
-				ret = code().mk_binop(IrnOp::UnsgnMod, ret, 
-					__parse_factor(unsgn));
-			}
-		}
-		else if (old_next_tok == &Tok::BitAnd)
-		{
-			//ret &= __handle_factor(some_parse_vec, index);
-			ret = code().mk_binop(IrnOp::BitAnd, ret, 
-				__parse_factor(unsgn));
-		}
-		else if (old_next_tok == &Tok::BitOr)
-		{
-			//ret |= __handle_factor(some_parse_vec, index);
-			ret = code().mk_binop(IrnOp::BitOr, ret, 
-				__parse_factor(unsgn));
-		}
-		else if (old_next_tok == &Tok::BitXor)
-		{
-			//ret ^= __handle_factor(some_parse_vec, index);
-			ret = code().mk_binop(IrnOp::BitXor, ret, 
-				__parse_factor(unsgn));
-		}
-		else if (old_next_tok == &Tok::BitShL)
-		{
-			//ret <<= __handle_factor(some_parse_vec, index);
-			ret = code().mk_binop(IrnOp::Lsl, ret, __parse_factor(unsgn));
-		}
-		else if (old_next_tok == &Tok::BitShR)
-		{
-			//ret >>= __handle_factor(some_parse_vec, index);
-			if (!unsgn)
-			{
-				ret = code().mk_binop(IrnOp::Asr, ret, 
-					__parse_factor(unsgn));
-			}
-			else
-			{
-				ret = code().mk_binop(IrnOp::Lsr, ret, 
-					__parse_factor(unsgn));
-			}
-		}
-	}
-	return ret;
-
-}
-IrNode* Compiler::__parse_factor(bool unsgn)
-{
-	IrNode* ret = nullptr;
-
-	if (next_tok() == &Tok::NatNum)
-	{
-		ret = code().mk_const(next_num());
-		lex();
-		return ret;
-	}
-	//else if (next_tok() == &Tok::Ident)
-	//{
-
-	//	lex();
-	//}
-
-	else if (next_tok() == &Tok::LParen)
-	{
-		lex();
-
-		ret = parse_expr(unsgn);
-
-		match(&Tok::RParen);
-	}
-	else
-	{
-		we().err("Invalid expression");
-	}
-
-
-	return ret;
-
 }
 
 

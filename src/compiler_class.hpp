@@ -167,9 +167,12 @@ private:		// functions
 
 
 	IrNode* parse_expr(bool unsgn);
+	IrNode* __parse_expr_conditional(bool unsgn);
 	IrNode* __parse_expr_regular(bool unsgn);
 	IrNode* __parse_term(bool unsgn);
 	IrNode* __parse_factor(bool unsgn);
+
+	IrNode* __parse_expr_leading(bool unsgn);
 
 
 
