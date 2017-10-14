@@ -753,10 +753,10 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 		osprintout(os, ")");
 	}
 
-	// kill
+	// clean
 	else if (p->is_clean())
 	{
-		osprintout(os, "kill(");
+		osprintout(os, "clean(");
 		osprintout(os, p->__varg->name(), "{", p->__varg->scope_lev(),
 			", ", p->__varg->scope_num(), "}");
 		osprintout(os, ")");
