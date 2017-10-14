@@ -79,11 +79,15 @@ public:		// functions
 		return sym()->name();
 	}
 
+	s32 builtin_type_size() const;
+	bool builtin_type_unsgn() const;
+
 	gen_getter_and_setter_by_val(type_sym);
 	gen_getter_and_setter_by_val(sym);
 	gen_getter_and_setter_by_val(scope_lev);
 	gen_getter_and_setter_by_val(scope_num);
 	gen_getter_and_setter_by_val(dim);
+
 
 };
 

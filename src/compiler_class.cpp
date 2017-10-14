@@ -360,41 +360,33 @@ bool Compiler::parse_assignment_stmt(bool just_test)
 
 	IrNode* rhs = nullptr;
 
-	size_t size = 0;
+	const s32 type_size = var->builtin_type_size();
+	const bool unsgn = var->builtin_type_unsgn();
 
-	// Temporary!
-	if (var->type_name() == "s32")
-	{
-		rhs = parse_expr(false);
-		size = 32;
-	}
-	else if (var->type_name() == "u32")
-	{
-		rhs = parse_expr(true);
-		size = 32;
-	}
-	else
-	{
-		we().err("parse_assignment_stmt():  Not yet supported typename, ",
-			"or possibly not ever supported typename!");
-	}
+	rhs = parse_expr(unsgn);
+
+	//else
+	//{
+	//	we().err("parse_assignment_stmt():  Not yet supported typename, ",
+	//		"or possibly not ever supported typename!");
+	//}
 
 	match(&Tok::Semicolon);
 
 
-	if (size == 8)
+	if (type_size == 8)
 	{
 		code().mk_stop(IrnStoreType::St8, var, rhs);
 	}
-	else if (size == 16)
+	else if (type_size == 16)
 	{
 		code().mk_stop(IrnStoreType::St16, var, rhs);
 	}
-	else if (size == 32)
+	else if (type_size == 32)
 	{
 		code().mk_stop(IrnStoreType::St32, var, rhs);
 	}
-	else if (size == 64)
+	else if (type_size == 64)
 	{
 		code().mk_stop(IrnStoreType::St64, var, rhs);
 	}
@@ -654,20 +646,63 @@ IrNode* Compiler::__parse_factor(bool unsgn)
 	}
 	else if (next_tok() == &Tok::Ident)
 	{
+		Var* var = var_tbl().find(next_sym_str());
+
 		lex();
+
+		const s32 type_size = var->builtin_type_size();
+		const bool unsgn = var->builtin_type_unsgn();
 
 		// Temporary!
 		if (!unsgn)
 		{
-			ret = code().mk_ldop(IrnLoadType::LdSgn32, 
-				var_tbl().find(next_sym_str()));
+			//ret = code().mk_ldop(IrnLoadType::LdSgn32, 
+			//	var_tbl().find(next_sym_str()));
+			if (type_size == 64)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdSgn64, var);
+			}
+			else if (type_size == 32)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdSgn32, var);
+			}
+			else if (type_size == 16)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdSgn16, var);
+			}
+			else if (type_size == 8)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdSgn8, var);
+			}
+			else
+			{
+				we().err("__parse_factor():  Eek!\n");
+			}
 		}
 		else
 		{
-		{
-			ret = code().mk_ldop(IrnLoadType::LdUnsgn32, 
-				var_tbl().find(next_sym_str()));
-		}
+			//ret = code().mk_ldop(IrnLoadType::LdUnsgn32, 
+			//	var_tbl().find(next_sym_str()));
+			if (type_size == 64)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdUnsgn64, var);
+			}
+			else if (type_size == 32)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdUnsgn32, var);
+			}
+			else if (type_size == 16)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdUnsgn16, var);
+			}
+			else if (type_size == 8)
+			{
+				ret = code().mk_ldop(IrnLoadType::LdUnsgn8, var);
+			}
+			else
+			{
+				we().err("__parse_factor():  Eek!\n");
+			}
 		}
 
 		return ret;
