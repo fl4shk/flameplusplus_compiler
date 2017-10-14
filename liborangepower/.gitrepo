@@ -6,6 +6,6 @@
 [subrepo]
 	remote = /home/fl4shk/Documents/programming_and_electronics/c++/projects/libraries/liborangepower
 	branch = master
-	commit = 9f1f4c5142f4cf6e2e743c39e7ba0d08aeff0bfb
-	parent = d9acdb64bc4c639ae3e29144513452095fb213af
+	commit = 9b21c171b863a9a0e92b7481034549dcdc3fc159
+	parent = 00d4d2761a98d3e0b416678a97242553ff967e3e
 	cmdver = 0.3.1
