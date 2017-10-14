@@ -345,13 +345,11 @@ IrNode* Compiler::parse_expr(bool unsgn)
 
 		if (old_next_tok == &Tok::LogAnd)
 		{
-			ret = code().mk_binop(IrnOp::LogAnd, ret,
-				__parse_expr_conditional(unsgn));
+			ret = code().mk_logand(ret, __parse_expr_conditional(unsgn));
 		}
 		else if (old_next_tok == &Tok::LogOr)
 		{
-			ret = code().mk_binop(IrnOp::LogOr, ret,
-				__parse_expr_conditional(unsgn));
+			ret = code().mk_logor(ret, __parse_expr_conditional(unsgn));
 		}
 	}
 
@@ -379,9 +377,10 @@ IrNode* Compiler::__parse_expr_conditional(bool unsgn)
 		}
 		else if (old_next_tok == &Tok::CmpNe)
 		{
-			ret = code().mk_binop(IrnOp::Eq, ret,
-				__parse_expr_regular(unsgn));
-			ret = code().mk_bitnot(ret);
+			//ret = code().mk_binop(IrnOp::Eq, ret,
+			//	__parse_expr_regular(unsgn));
+			//ret = code().mk_bitnot(ret);
+			ret = code().mk_noteq(ret, __parse_expr_regular(unsgn));
 		}
 		else if (old_next_tok == &Tok::CmpLt)
 		{

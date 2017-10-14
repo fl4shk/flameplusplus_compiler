@@ -48,6 +48,7 @@ enum class IrnOp
 
 
 	BitNot,
+	LogNot,
 
 
 	// Logical shift left
@@ -75,12 +76,6 @@ enum class IrnOp
 
 	// Signed >=
 	SgnGe,
-
-	// &&
-	LogAnd,
-
-	// ||
-	LogOr,
 
 
 
@@ -237,6 +232,10 @@ public:		// functions
 	}
 
 
+	inline s64& get_const_arg()
+	{
+		return carg;
+	}
 	inline IrNode* get_store_src()
 	{
 		return irnarg[0];
@@ -332,7 +331,7 @@ public:		// functions
 
 
 
-	int ir_to_index(IrNode* irn) const;
+	int irn_to_index(IrNode* irn) const;
 
 
 	IrNode* mkirn();
@@ -341,7 +340,14 @@ public:		// functions
 	IrNode* mk_binop(IrnOp op, IrNode* a, IrNode* b);
 	IrNode* mk_negate(IrNode* irn0);
 	IrNode* mk_bitnot(IrNode* irn0);
+	IrNode* mk_lognot(IrNode* irn0);
 
+	// Helpers
+	IrNode* mk_noteq(IrNode* a, IrNode* b);
+	IrNode* mk_logand(IrNode* a, IrNode* b);
+	IrNode* mk_logor(IrNode* a, IrNode* b);
+
+	// Load/Store
 	IrNode* mk_ldop(IrnLoadType ldtyp, Var* varg);
 	IrNode* mk_ldxop(IrnLoadType ldtyp, Var* varg, IrNode* irn0);
 	IrNode* mk_stop(IrnStoreType sttyp, Var* varg, IrNode* irn1);
@@ -349,7 +355,7 @@ public:		// functions
 		IrNode* irn1);
 
 
-
+	// 
 	IrNode* mk_const(s64 val);
 	IrNode* mk_lab(s64 val);
 	IrNode* mk_sel(IrNode* dst, s64 lab0, s64 lab1);

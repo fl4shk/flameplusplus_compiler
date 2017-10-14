@@ -33,9 +33,7 @@ bool IrNode::is_binop() const
 
 		IrnOp::Eq, 
 		IrnOp::UnsgnGt, IrnOp::UnsgnGe, 
-		IrnOp::SgnGt, IrnOp::SgnGe,
-		
-		IrnOp::LogAnd, IrnOp::LogOr);
+		IrnOp::SgnGt, IrnOp::SgnGe);
 }
 
 bool IrNode::is_commutative_binop() const
@@ -128,7 +126,7 @@ IrCode::~IrCode()
 	}
 }
 
-int IrCode::ir_to_index(IrNode* irn) const
+int IrCode::irn_to_index(IrNode* irn) const
 {
 	int ret = 0;
 
@@ -175,7 +173,19 @@ IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b)
 		printerr("IrCode::mk_binop():  Eek!\n");
 		exit(1);
 	}
+
+	if (temp.is_commutative_binop())
+	{
+		// Normalize operand order for commutative ops
+		if (irn_to_index(b) < irn_to_index(a))
+		{
+			IrNode* irn = a;
+			a = b;
+			b = irn;
+		}
 	}
+	}
+
 
 	IrNode* p = mkirn();
 	p->op = op;
@@ -199,6 +209,37 @@ IrNode* IrCode::mk_bitnot(IrNode* irn0)
 	p->irnarg[0] = irn0;
 
 	return p;
+}
+
+IrNode* IrCode::mk_lognot(IrNode* irn0)
+{
+	IrNode* p = mkirn();
+	p->op = IrnOp::LogNot;
+	p->irnarg[0] = irn0;
+
+	return p;
+}
+
+
+IrNode* IrCode::mk_noteq(IrNode* a, IrNode* b)
+{
+	IrNode* p = mk_binop(IrnOp::Eq, a, b);
+	p = mk_lognot(p);
+	return p;
+}
+IrNode* IrCode::mk_logand(IrNode* a, IrNode* b)
+{
+	IrNode* p = mk_noteq(a, mk_const(0));
+	IrNode* q = mk_noteq(b, mk_const(0));
+
+	return mk_binop(IrnOp::BitAnd, p, q);
+}
+IrNode* IrCode::mk_logor(IrNode* a, IrNode* b)
+{
+	IrNode* p = mk_noteq(a, mk_const(0));
+	IrNode* q = mk_noteq(b, mk_const(0));
+
+	return mk_binop(IrnOp::BitOr, p, q);
 }
 
 IrNode* IrCode::mk_ldop(IrnLoadType ldtyp, Var* varg)
@@ -317,6 +358,16 @@ IrNode* IrCode::mk_stxop(IrnStoreType sttyp, Var* varg, IrNode* irn0,
 
 IrNode* IrCode::mk_const(s64 val)
 {
+	// Search until we hit the edge of a basic block
+	for (IrNode* p=head.prev; (!p->is_lab() && p!=&head); p=p->prev)
+	{
+		if (p->is_const() && p->get_const_arg() == val)
+		{
+			return p;
+		}
+	}
+
+	// Make a new constant
 	IrNode* p = mkirn();
 	p->op = IrnOp::Const;
 	p->carg = val;
@@ -352,13 +403,13 @@ IrNode* IrCode::mk_kill(Var* varg)
 
 std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 {
-	osprintout(os, ir_to_index(p), ":\t\t");
+	osprintout(os, irn_to_index(p), ":\t\t");
 
 	auto print_binop = [&](const std::string& text) -> void
 	{
 		osprintout(os, text, "(");
-		osprintout(os, ir_to_index(p->irnarg[0]), ", ", 
-			ir_to_index(p->irnarg[1]));
+		osprintout(os, irn_to_index(p->irnarg[0]), ", ", 
+			irn_to_index(p->irnarg[1]));
 		osprintout(os, ")");
 	};
 
@@ -375,7 +426,7 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 	{
 		osprintout(os, text, "(");
 		osprintout(os, p->varg->name(), "{", p->varg->scope_lev(),
-			", ", p->varg->scope_num(), "}, ", ir_to_index(p->irnarg[0]));
+			", ", p->varg->scope_num(), "}, ", irn_to_index(p->irnarg[0]));
 		osprintout(os, ")");
 	};
 
@@ -383,7 +434,7 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 	{
 		osprintout(os, text, "(");
 		osprintout(os, p->varg->name(), "{", p->varg->scope_lev(),
-			", ", p->varg->scope_num(), "}, ", ir_to_index(p->irnarg[1]));
+			", ", p->varg->scope_num(), "}, ", irn_to_index(p->irnarg[1]));
 		osprintout(os, ")");
 	};
 
@@ -391,8 +442,8 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 	{
 		osprintout(os, text, "(");
 		osprintout(os, p->varg->name(), "{", p->varg->scope_lev(),
-			", ", p->varg->scope_num(), "}, ", ir_to_index(p->irnarg[0]),
-			", ", ir_to_index(p->irnarg[1]));
+			", ", p->varg->scope_num(), "}, ", irn_to_index(p->irnarg[0]),
+			", ", irn_to_index(p->irnarg[1]));
 		osprintout(os, ")");
 	};
 
@@ -406,7 +457,7 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 			break;
 		case IrnOp::Negate:
 			osprintout(os, "neg(");
-			osprintout(os, ir_to_index(p->irnarg[0]));
+			osprintout(os, irn_to_index(p->irnarg[0]));
 			osprintout(os, ")");
 			break;
 		case IrnOp::Mul:
@@ -440,7 +491,13 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 
 		case IrnOp::BitNot:
 			osprintout(os, "bitnot(");
-			osprintout(os, ir_to_index(p->irnarg[0]));
+			osprintout(os, irn_to_index(p->irnarg[0]));
+			osprintout(os, ")");
+			break;
+
+		case IrnOp::LogNot:
+			osprintout(os, "lognot(");
+			osprintout(os, irn_to_index(p->irnarg[0]));
 			osprintout(os, ")");
 			break;
 
@@ -485,16 +542,6 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 		// Signed >=
 		case IrnOp::SgnGe:
 			print_binop("sge");
-			break;
-
-		// &&
-		case IrnOp::LogAnd:
-			print_binop("logand");
-			break;
-
-		// ||
-		case IrnOp::LogOr:
-			print_binop("logor");
 			break;
 
 		// ldu32op
@@ -608,7 +655,7 @@ std::ostream& IrCode::osprint_irn(std::ostream& os, IrNode* p) const
 		// selop
 		case IrnOp::Sel:
 			osprintout(os, "sel(");
-			osprintout(os, ir_to_index(p->irnarg[0]), ", ", p->larg[0], 
+			osprintout(os, irn_to_index(p->irnarg[0]), ", ", p->larg[0], 
 				", ", p->larg[1]);
 			osprintout(os, ")");
 			break;
