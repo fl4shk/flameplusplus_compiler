@@ -20,6 +20,8 @@
 
 namespace flame_plus_plus
 {
+//const bool IrCode::optimize = false;
+const bool IrCode::optimize = true;
 
 IrCode::IrCode()
 {

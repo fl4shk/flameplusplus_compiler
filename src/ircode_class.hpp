@@ -29,10 +29,9 @@ namespace flame_plus_plus
 class IrCode
 {
 public:		// variables
+	static const bool optimize;
 	IrNode head;
 
-	bool optimize = false;
-	//bool optimize = true;
 
 public:		// functions
 	IrCode();

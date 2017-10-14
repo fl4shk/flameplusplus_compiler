@@ -185,20 +185,28 @@ enum class IrnStoreType : s64
 //	return (s64)sttyp;
 //}
 
+class IrCode;
+
 // Base class for a node in the internal representation
 class IrNode
 {
+friend class IrCode;
+
 public:		// static constexpr variables
 	static constexpr size_t num_args = 2;
 
-//protected:		// variables
-public:		// variables
+protected:		// variables
+//public:		// variables
 	s64 __op;
 	s64 __const_arg;
 
 	IrNode* __irnarg[num_args];
 	s64 __larg[num_args];
 	Var* __varg;
+
+
+
+	//std::vector<CallArg> __call_args;
 
 
 public:		// variables
@@ -415,8 +423,14 @@ public:		// functions
 
 //class IrCallNode : public IrNode
 //{
+//public:		// functions
+//	inline IrCallNode(std::vector<CallArg>&& s_call_args)
+//	{
+//		__call_args = std::move(s_call_args);
+//	}
 //	virtual bool is_call() const;
 //};
+
 class IrCleanNode : public IrNode
 {
 public:		// functions
