@@ -337,6 +337,57 @@ IrNode* Compiler::parse_expr()
 
 	ret = __parse_expr_regular();
 
+	while (any_tok_matches(next_tok(), &Tok::CmpEq, &Tok::CmpNe,
+		&Tok::CmpLt, &Tok::CmpLe, &Tok::CmpGt, &Tok::CmpGe, 
+		&Tok::LogAnd, &Tok::LogOr))
+	{
+		const auto old_next_tok = next_tok();
+
+		lex();
+
+		if (old_next_tok == &Tok::CmpEq)
+		{
+			ret = code().mk_binop(IrnOp::Eq, ret,
+				__parse_expr_regular());
+		}
+		else if (old_next_tok == &Tok::CmpNe)
+		{
+			ret = code().mk_binop(IrnOp::Eq, ret,
+				__parse_expr_regular());
+			ret = code().mk_bitnot(ret);
+		}
+		else if (old_next_tok == &Tok::CmpLt)
+		{
+			ret = code().mk_binop(IrnOp::SgnGt, __parse_expr_regular(), 
+				ret);
+		}
+		else if (old_next_tok == &Tok::CmpLe)
+		{
+			ret = code().mk_binop(IrnOp::SgnGe, __parse_expr_regular(), 
+				ret);
+		}
+		else if (old_next_tok == &Tok::CmpGt)
+		{
+			ret = code().mk_binop(IrnOp::SgnGt, ret,
+				__parse_expr_regular());
+		}
+		else if (old_next_tok == &Tok::CmpGe)
+		{
+			ret = code().mk_binop(IrnOp::SgnGe, ret,
+				__parse_expr_regular());
+		}
+		else if (old_next_tok == &Tok::LogAnd)
+		{
+			ret = code().mk_binop(IrnOp::BitAnd, ret,
+				__parse_expr_regular());
+		}
+		else if (old_next_tok == &Tok::LogOr)
+		{
+			ret = code().mk_binop(IrnOp::BitOr, ret,
+				__parse_expr_regular());
+		}
+	}
+
 	return ret;
 }
 IrNode* Compiler::__parse_expr_regular()
