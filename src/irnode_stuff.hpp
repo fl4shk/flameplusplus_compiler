@@ -260,6 +260,7 @@ public:		// functions
 
 	bool is_binop() const;
 	bool is_commutative_binop() const;
+	bool is_unop() const;
 	bool is_compare() const;
 	inline bool is_unsigned_compare() const
 	{
@@ -338,9 +339,8 @@ public:		// functions
 	void rmirn(IrNode* irn);
 
 	IrNode* mk_binop(IrnOp op, IrNode* a, IrNode* b, bool unsgn);
-	IrNode* mk_negate(IrNode* irn0);
-	IrNode* mk_bitnot(IrNode* irn0);
-	IrNode* mk_lognot(IrNode* irn0);
+	IrNode* mk_unop(IrnOp op, IrNode* irn0);
+
 
 	// Helpers
 	IrNode* mk_noteq(IrNode* a, IrNode* b);

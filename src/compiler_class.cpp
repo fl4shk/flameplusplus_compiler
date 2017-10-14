@@ -620,18 +620,21 @@ IrNode* Compiler::__parse_expr_leading(bool unsgn)
 		}
 		else if (last_tok == &Tok::Minus)
 		{
-			ret = code().mk_negate(__parse_term(unsgn));
+			//ret = code().mk_negate(__parse_term(unsgn));
+			ret = code().mk_unop(IrnOp::Negate, __parse_term(unsgn));
 		}
 		else if (last_tok == &Tok::BitNot)
 		{
-			ret = code().mk_bitnot(__parse_term(unsgn));
+			//ret = code().mk_bitnot(__parse_term(unsgn));
+			ret = code().mk_unop(IrnOp::BitNot, __parse_term(unsgn));
 		}
 		else // if (last_tok == &Tok::LogNot)
 		{
 			//ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
 			//	__parse_term(unsgn), unsgn);
 			//ret = code().mk_bitnot(ret);
-			ret = code().mk_lognot(ret);
+			//ret = code().mk_lognot(ret);
+			ret = code().mk_unop(IrnOp::LogNot, __parse_term(unsgn));
 		}
 
 		for (s64 i=leading_tok_vec.size()-2; i>=0; --i)
@@ -643,18 +646,22 @@ IrNode* Compiler::__parse_expr_leading(bool unsgn)
 			}
 			else if (tok == &Tok::Minus)
 			{
-				ret = code().mk_negate(ret);
+				//ret = code().mk_negate(ret);
+				ret = code().mk_unop(IrnOp::Negate, ret);
 			}
 			else if (last_tok == &Tok::BitNot)
 			{
-				ret = code().mk_bitnot(ret);
+				//ret = code().mk_bitnot(ret);
+				ret = code().mk_unop(IrnOp::BitNot, ret);
 			}
 			else // if (last_tok == &Tok::LogNot)
 			{
 				//ret = code().mk_binop(IrnOp::Eq, code().mk_const(0), ret,
 				//	unsgn);
 				//ret = code().mk_bitnot(ret);
-				ret = code().mk_lognot(ret);
+
+				//ret = code().mk_lognot(ret);
+				ret = code().mk_unop(IrnOp::LogNot, ret);
 			}
 		}
 	}

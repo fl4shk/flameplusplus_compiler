@@ -44,6 +44,11 @@ bool IrNode::is_commutative_binop() const
 
 		IrnOp::Eq);
 }
+bool IrNode::is_unop() const
+{
+	return any_irnop_matches(op, IrnOp::Negate, IrnOp::BitNot,
+		IrnOp::LogNot);
+}
 
 bool IrNode::is_compare() const
 {
@@ -174,6 +179,131 @@ IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b, bool unsgn)
 		exit(1);
 	}
 
+	// Constant folding
+	if (a->is_const() && b->is_const())
+	{
+		u64 temp_u;
+		s64 temp_s;
+
+		switch (op)
+		{
+			case IrnOp::Add:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					+ (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() + b->get_const_arg();
+				break;
+
+			case IrnOp::Sub:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					- (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() - b->get_const_arg();
+				break;
+
+			case IrnOp::Mul:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					* (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() * b->get_const_arg();
+				break;
+
+			case IrnOp::UnsgnDiv:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					/ (static_cast<u64>(b->get_const_arg()));
+				temp_s = -9000;
+				break;
+
+			case IrnOp::UnsgnMod:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					% (static_cast<u64>(b->get_const_arg()));
+				temp_s = -9000;
+				break;
+
+			case IrnOp::SgnDiv:
+				temp_u = 9000;
+				temp_s = a->get_const_arg() / b->get_const_arg();
+				break;
+
+			case IrnOp::SgnMod:
+				temp_u = 9000;
+				temp_s = a->get_const_arg() % b->get_const_arg();
+				break;
+
+
+			case IrnOp::BitAnd:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					& (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() & b->get_const_arg();
+				break;
+			case IrnOp::BitOr:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					| (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() | b->get_const_arg();
+				break;
+			case IrnOp::BitXor:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					^ (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() ^ b->get_const_arg();
+				break;
+
+			case IrnOp::Lsl:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					<< (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() << b->get_const_arg();
+				break;
+			case IrnOp::Lsr:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					>> (static_cast<u64>(b->get_const_arg()));
+				temp_s = -9000;
+				break;
+
+			case IrnOp::Asr:
+				temp_u = 9000;
+				temp_s = a->get_const_arg() >> b->get_const_arg();
+				break;
+
+			case IrnOp::Eq:
+				temp_u = (static_cast<u64>(a->get_const_arg()))
+					== (static_cast<u64>(b->get_const_arg()));
+				temp_s = a->get_const_arg() == b->get_const_arg();
+				break;
+
+
+			case IrnOp::UnsgnGt:
+				temp_u = ((static_cast<u64>(a->get_const_arg()))
+					> (static_cast<u64>(b->get_const_arg())));
+				temp_s = -9000;
+				break;
+
+			case IrnOp::UnsgnGe:
+				temp_u = ((static_cast<u64>(a->get_const_arg()))
+					>= (static_cast<u64>(b->get_const_arg())));
+				temp_s = -9000;
+				break;
+			case IrnOp::SgnGt:
+				temp_u = 9000;
+				temp_s = ((a->get_const_arg()) > (b->get_const_arg()));
+				break;
+
+			case IrnOp::SgnGe:
+				temp_u = 9000;
+				temp_s = ((a->get_const_arg()) >= (b->get_const_arg()));
+				break;
+
+			default:
+				printerr("mk_binop():  constant folding Eek!\n");
+				exit(1);
+				break;
+		}
+
+		if (!unsgn)
+		{
+			return mk_const(temp_s);
+		}
+		else
+		{
+			return mk_const(temp_u);
+		}
+	}
+
 	if (temp.is_commutative_binop())
 	{
 		// Normalize operand order for commutative ops
@@ -194,37 +324,87 @@ IrNode* IrCode::mk_binop(IrnOp op, IrNode* a, IrNode* b, bool unsgn)
 
 	return p;
 }
-IrNode* IrCode::mk_negate(IrNode* irn0)
+IrNode* IrCode::mk_unop(IrnOp op, IrNode* irn0)
 {
+	{
+	IrNode temp;
+	temp.op = op;
+
+	if (!temp.is_unop())
+	{
+		printerr("IrCode::mk_unop():  Eek!\n");
+		exit(1);
+	}
+
+	// Constant folding
+	if (irn0->is_const())
+	{
+		s64 temp_s;
+		
+		switch (op)
+		{
+			case IrnOp::Negate:
+				temp_s = -irn0->get_const_arg();
+				break;
+
+			case IrnOp::BitNot:
+				temp_s = ~irn0->get_const_arg();
+				break;
+
+			case IrnOp::LogNot:
+				temp_s = !irn0->get_const_arg();
+				break;
+
+			default:
+				printerr("mk_unop():  constant folding Eek!\n");
+				exit(1);
+				break;
+		}
+
+		return mk_const(temp_s);
+	}
+	}
+
 	IrNode* p = mkirn();
-	p->op = IrnOp::Negate;
+	p->op = op;
 	p->irnarg[0] = irn0;
 
 	return p;
 }
-IrNode* IrCode::mk_bitnot(IrNode* irn0)
-{
-	IrNode* p = mkirn();
-	p->op = IrnOp::BitNot;
-	p->irnarg[0] = irn0;
 
-	return p;
-}
 
-IrNode* IrCode::mk_lognot(IrNode* irn0)
-{
-	IrNode* p = mkirn();
-	p->op = IrnOp::LogNot;
-	p->irnarg[0] = irn0;
-
-	return p;
-}
+//IrNode* IrCode::mk_negate(IrNode* irn0)
+//{
+//	IrNode* p = mkirn();
+//	p->op = IrnOp::Negate;
+//	p->irnarg[0] = irn0;
+//
+//	return p;
+//}
+//IrNode* IrCode::mk_bitnot(IrNode* irn0)
+//{
+//	IrNode* p = mkirn();
+//	p->op = IrnOp::BitNot;
+//	p->irnarg[0] = irn0;
+//
+//	return p;
+//}
+//
+//IrNode* IrCode::mk_lognot(IrNode* irn0)
+//{
+//	IrNode* p = mkirn();
+//	p->op = IrnOp::LogNot;
+//	p->irnarg[0] = irn0;
+//
+//	return p;
+//}
 
 
 IrNode* IrCode::mk_noteq(IrNode* a, IrNode* b)
 {
 	IrNode* p = mk_binop(IrnOp::Eq, a, b, true);
-	p = mk_lognot(p);
+	//p = mk_lognot(p);
+	p = mk_unop(IrnOp::LogNot, p);
 	return p;
 }
 IrNode* IrCode::mk_logand(IrNode* a, IrNode* b)
