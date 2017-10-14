@@ -556,6 +556,8 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 
 		lex();
 
+		// Need the full parse_expr() here because __parse_term doesn't
+		// handle leading terms
 		if (minus)
 		{
 			ret = code().mk_binop(IrnOp::Sub, ret, parse_expr(unsgn));
