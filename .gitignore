@@ -39,3 +39,4 @@ docs/*.txt.ignore
 docs/tests
 flame++_compiler
 flame++_compiler_debug
+*.*pp.old
