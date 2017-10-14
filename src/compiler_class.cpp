@@ -340,11 +340,15 @@ bool Compiler::parse_assignment_stmt(bool just_test)
 	Var* var;
 	if (next_tok() == &Tok::Ident)
 	{
+		var = var_tbl().find(next_sym_str());
 		if (just_test)
 		{
-			return true;
+			return (var != nullptr);
 		}
-		var = var_tbl().find(next_sym_str());
+		if (var == nullptr)
+		{
+			we().err("parse_assignment_stmt():  undeclared variable!");
+		}
 		lex();
 	}
 	else
@@ -650,6 +654,10 @@ IrNode* Compiler::__parse_factor(bool unsgn)
 
 		lex();
 
+		if (var == nullptr)
+		{
+			we().err("__parse_factor():  undeclared variable!");
+		}
 		const s32 type_size = var->builtin_type_size();
 		const bool unsgn = var->builtin_type_unsgn();
 
