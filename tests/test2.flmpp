@@ -1,8 +1,8 @@
 u8 i;
 s8 b;
-s8 alkdflasdfjkldfjlkdfjklsdf;
-b = alkdflasdfjkldfjlkdfjklsdf;
+s8 jonah;
+b = jonah;
 
 i = i + (3 + 9) << 6;
 b = i;
-alkdflasdfjkldfjlkdfjklsdf = alkdflasdfjkldfjlkdfjklsdf;
+jonah = jonah;
