@@ -16,14 +16,14 @@
 // with Flame++ Compiler.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef irnode_stuff_hpp
-#define irnode_stuff_hpp
+#ifndef irnode_classes_hpp
+#define irnode_classes_hpp
+
 
 #include "var_class.hpp"
 
 namespace flame_plus_plus
 {
-
 
 enum class IrnBinOp : s64
 {
@@ -163,6 +163,28 @@ enum class IrnStoreType : s64
 	St8,
 };
 
+//inline operator s64 (IrnBinOp op)
+//{
+//	return (s64)op;
+//}
+//inline operator s64 (IrnUnOp op)
+//{
+//	return (s64)op;
+//}
+//inline operator s64 (IrnLdStOp op)
+//{
+//	return (s64) op;
+//}
+//inline operator s64 (IrnLoadType ldtyp)
+//{
+//	return (s64)ldtyp;
+//}
+//
+//inline operator s64 (IrnStoreType sttyp)
+//{
+//	return (s64)sttyp;
+//}
+
 // Base class for a node in the internal representation
 class IrNode
 {
@@ -188,11 +210,40 @@ public:		// functions
 	{
 		__op = -1;
 	}
+	virtual ~IrNode()
+	{
+	}
 
 	inline s64& get_op()
 	{
 		return __op;
 	}
+	inline IrnBinOp get_irn_bin_op() const
+	{
+		return static_cast<IrnBinOp>(__op);
+	}
+	inline IrnUnOp get_irn_un_op() const
+	{
+		return static_cast<IrnUnOp>(__op);
+	}
+	inline IrnLdStOp get_irn_ldst_op() const
+	{
+		return static_cast<IrnLdStOp>(__op);
+	}
+
+	inline void set_irn_bin_op(IrnBinOp op)
+	{
+		__op = static_cast<s64>(op);
+	}
+	inline void set_irn_un_op(IrnUnOp op)
+	{
+		__op = static_cast<s64>(op);
+	}
+	inline void set_irn_ldst_op(IrnLdStOp op)
+	{
+		__op = static_cast<s64>(op);
+	}
+
 
 	inline s64& get_const_arg()
 	{
@@ -306,9 +357,11 @@ class IrLdStNode : public IrNode
 public:		// functions
 	inline IrLdStNode(IrnLdStOp s_op, Var* s_varg, IrNode* s_irnarg0,
 		IrNode* s_irnarg1)
-		: __varg(s_varg)
 	{
 		__op = (s64)s_op;
+		__varg = s_varg;
+
+		init_array(__irnarg, s_irnarg0, s_irnarg1);
 	}
 
 	bool is_ldst_32() const;
@@ -332,8 +385,8 @@ class IrConstNode : public IrNode
 {
 public:		// functions
 	inline IrConstNode(s64 val)
-		: __const_arg(val)
 	{
+		__const_arg = val;
 	}
 
 	virtual bool is_const() const;
@@ -368,95 +421,13 @@ class IrCleanNode : public IrNode
 {
 public:		// functions
 	inline IrCleanNode(Var* s_varg)
-		: __varg(s_varg)
 	{
+		__varg = s_varg;
 	}
 	virtual bool is_clean() const;
 };
 
-
-// IrNode List, and also part of the optimizer
-class IrCode
-{
-public:		// variables
-	IrNode head;
-
-public:		// functions
-	IrCode();
-	~IrCode();
-
-
-
-	int irn_to_index(IrNode* irn) const;
-
-
-	IrNode* mkirn();
-	void rmirn(IrNode* irn);
-
-	IrNode* mk_binop(IrnBinOp op, IrNode* a, IrNode* b, bool unsgn);
-	IrNode* mk_unop(IrnUnOp op, IrNode* irn0);
-
-
-	// Helpers
-	IrNode* mk_noteq(IrNode* a, IrNode* b);
-	IrNode* mk_logand(IrNode* a, IrNode* b);
-	IrNode* mk_logor(IrNode* a, IrNode* b);
-
-	// Load/Store
-	IrNode* mk_ldop(IrnLoadType ldtyp, Var* varg);
-	IrNode* mk_ldxop(IrnLoadType ldtyp, Var* varg, IrNode* irn0);
-	IrNode* mk_stop(IrnStoreType sttyp, Var* varg, IrNode* irn1);
-	IrNode* mk_stxop(IrnStoreType sttyp, Var* varg, IrNode* irn0, 
-		IrNode* irn1);
-
-
-	// 
-	IrNode* mk_const(s64 val);
-	IrNode* mk_lab(s64 val);
-	IrNode* mk_condjump(IrNode* dst, s64 lab0, s64 lab1);
-
-
-	// Yes, this is a "make clean" joke....
-	// Okay, it wasn't originally intended as one.  Eh.
-	IrNode* mk_clean(Var* varg);
-
-
-
-
-	std::ostream& osprint_irn(std::ostream& os, IrNode* p) const;
-
-
-private:		// functions
-	inline void __delink_irn(IrNode* irn)
-	{
-		irn->prev->next = irn->next;
-		irn->next->prev = irn->prev;
-	}
-
-	inline void __relink_irn(IrNode* irn, IrNode* to_link_after)
-	{
-		IrNode* old_next = to_link_after->next;
-
-		to_link_after->next = irn;
-		irn->prev = to_link_after;
-		irn->next = old_next;
-		old_next->prev = irn;
-	}
-
-	inline IrNode* __append(IrNode* irn)
-	{
-		__relink_irn(irn, head.prev);
-		return irn;
-	}
-
-
-	IrNode* __mk_ldop(IrnLdStOp op, Var* varg);
-	IrNode* __mk_ldxop(IrnLdStOp op, Var* varg, IrNode* irn0);
-	IrNode* __mk_stop(IrnLdStOp op, Var* varg, IrNode* irn1);
-	IrNode* __mk_stxop(IrnLdStOp op, Var* varg, IrNode* irn0, IrNode* irn1);
-};
-
-
 }
 
-#endif		// irnode_stuff_hpp
+
+#endif		// irnode_classes_hpp
