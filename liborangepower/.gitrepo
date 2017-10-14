@@ -7,5 +7,5 @@
 	remote = /home/fl4shk/Documents/programming_and_electronics/c++/projects/libraries/liborangepower
 	branch = master
 	commit = 9f1f4c5142f4cf6e2e743c39e7ba0d08aeff0bfb
-	parent = 4af9aa129f3ab18eb6c572985d93302ec0188c54
+	parent = d9acdb64bc4c639ae3e29144513452095fb213af
 	cmdver = 0.3.1
