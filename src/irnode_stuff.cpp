@@ -155,9 +155,9 @@ IrNode* IrCode::mkirn()
 }
 void IrCode::rmirn(IrNode* irn)
 {
-	printout("Removing this Irn:  ");
-	osprint_irn(cout, irn);
-	printout("\n");
+	//printout("Removing this Irn:  ");
+	//osprint_irn(cout, irn);
+	//printout("\n");
 	__delink_irn(irn);
 	delete irn;
 }
