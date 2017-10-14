@@ -47,7 +47,7 @@ s32 Var::builtin_type_size() const
 
 bool Var::builtin_type_unsgn() const
 {
-	return (anything_matches(type_name(), "u64", "u32", "u16", "u8"))
+	return anything_matches(type_name(), "u64", "u32", "u16", "u8");
 }
 
 }
