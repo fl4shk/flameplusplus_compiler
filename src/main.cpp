@@ -20,17 +20,14 @@
 
 flame_plus_plus::Compiler compiler;
 
-void test_ir_code();
 
 
 int main(int argc, char** argv)
 {
-	//compiler.init(argc, argv);
-	//return compiler();
+	compiler.init(argc, argv);
+	return compiler();
 
-	test_ir_code();
-
-	return 0;
+	//return 0;
 }
 
 
@@ -62,31 +59,31 @@ int main(int argc, char** argv)
 //}
 
 
-void test_ir_code()
-{
-	using namespace flame_plus_plus;
-
-
-	IrCode code;
-
-	auto node0 = code.mk_const(9000);
-	auto node1 = code.mk_const(74);
-	auto node2 = code.mk_binop(IrnOp::Add, node0, node1);
-	auto node3 = code.mk_lab(0);
-
-	for (auto irn=code.head.next; irn!=&code.head; irn=irn->next)
-	{
-		code.osprint_irn(cout, irn);
-		printout("\n");
-		//printout(irn->is_binop(), " ", 
-		//	irn->is_commutative_binop(), "\n",
-
-		//	irn->is_compare(), "\n",
-
-		//	irn->is_ldst(), "\n",
-
-		//	irn->is_const(), " ", irn->is_lab(), " ", irn->is_sel(), " ",
-		//	irn->is_kill(), "\n");
-		//printout("\n\n");
-	}
-}
+//void test_ir_code()
+//{
+//	using namespace flame_plus_plus;
+//
+//
+//	IrCode code;
+//
+//	auto node0 = code.mk_const(9000);
+//	auto node1 = code.mk_const(74);
+//	auto node2 = code.mk_binop(IrnOp::Add, node0, node1);
+//	auto node3 = code.mk_lab(0);
+//
+//	for (auto irn=code.head.next; irn!=&code.head; irn=irn->next)
+//	{
+//		code.osprint_irn(cout, irn);
+//		printout("\n");
+//		//printout(irn->is_binop(), " ", 
+//		//	irn->is_commutative_binop(), "\n",
+//
+//		//	irn->is_compare(), "\n",
+//
+//		//	irn->is_ldst(), "\n",
+//
+//		//	irn->is_const(), " ", irn->is_lab(), " ", irn->is_sel(), " ",
+//		//	irn->is_kill(), "\n");
+//		//printout("\n\n");
+//	}
+//}

@@ -161,14 +161,14 @@ inline bool any_irnop_matches(IrnOp op)
 }
 
 template<typename... RemArgTypes>
-bool any_irnop_matches(IrnOp op, IrnOp next_to_check, 
+bool any_irnop_matches(IrnOp op, IrnOp next, 
 	RemArgTypes&&... rem_args)
 {
 	if (sizeof...(rem_args) == 0)
 	{
-		return (op == next_to_check);
+		return (op == next);
 	}
-	else if (op == next_to_check)
+	else if (op == next)
 	{
 		return true;
 	}

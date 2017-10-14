@@ -29,8 +29,6 @@ namespace flame_plus_plus
 {
 
 
-
-
 class Compiler
 {
 private:		// variables
@@ -45,8 +43,15 @@ private:		// variables
 	char** __argv;
 
 
-	size_t __last_lab = 0;
 
+	s64 __last_lab = -1;
+
+
+	// Used for break and continue.
+	IrNode * __loop_start = nullptr, * __loop_end = nullptr;
+
+
+	// Generated intermediate representation of code
 	IrCode __code;
 
 
@@ -68,7 +73,14 @@ private:		// functions
 	gen_getter_by_val(argc);
 	gen_getter_by_val(argv);
 	gen_getter_and_setter_by_val(last_lab);
-	gen_getter_by_ref(code);
+	inline const auto& code() const
+	{
+		return __code;
+	}
+	inline auto& code()
+	{
+		return __code;
+	}
 
 	inline void lex()
 	{
@@ -154,10 +166,20 @@ private:		// functions
 
 
 
-	IrNode* parse_expr_regular();
 	IrNode* parse_expr();
-	IrNode* parse_term();
-	IrNode* parse_factor();
+	IrNode* __parse_expr_regular();
+	IrNode* __parse_term();
+	IrNode* __parse_factor();
+
+
+
+	//inline IrNode* mk_lab()
+	//{
+	//	return __code.mk_lab(++__last_lab);
+	//}
+
+	void print_code() const;
+
 
 
 };

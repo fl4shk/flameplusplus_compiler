@@ -51,11 +51,18 @@ int Compiler::operator () ()
 
 	lex();
 
-	// For user idents
-	make_scope();
+	//// For user idents
+	//make_scope();
 
-	// Parse
-	parse_program();
+	//// Parse
+	//parse_program();
+
+
+
+	// For testing
+	parse_expr();
+
+	print_code();
 
 	return 0;
 }
@@ -324,21 +331,151 @@ bool Compiler::parse_assignment_stmt(bool just_test)
 
 
 
-IrNode* Compiler::parse_expr_regular()
-{
-	return nullptr;
-}
 IrNode* Compiler::parse_expr()
 {
-	return nullptr;
+	IrNode* ret = nullptr;
+
+	ret = __parse_expr_regular();
+
+	return ret;
 }
-IrNode* Compiler::parse_term()
+IrNode* Compiler::__parse_expr_regular()
 {
-	return nullptr;
+	IrNode* ret = nullptr;
+
+	if (next_tok() == &Tok::Plus)
+	{
+		lex();
+	}
+	else if (next_tok() == &Tok::Minus)
+	{
+		lex();
+
+		ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
+			__parse_term());
+	}
+	else
+	{
+		ret = __parse_term();
+	}
+
+	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
+	{
+		const bool minus = (next_tok() == &Tok::Minus);
+
+		lex();
+
+		if (minus)
+		{
+			ret = code().mk_binop(IrnOp::Sub, ret, __parse_term());
+		}
+		else
+		{
+			ret = code().mk_binop(IrnOp::Add, ret, __parse_term());
+		}
+	}
+
+	return ret;
 }
-IrNode* Compiler::parse_factor()
+IrNode* Compiler::__parse_term()
 {
-	return nullptr;
+	IrNode* ret = nullptr;
+
+	ret = __parse_factor();
+
+	//const auto some_next_tok = some_parse_vec.at(index).next_tok;
+
+	while (any_tok_matches(next_tok(), &Tok::Mul, &Tok::Div, &Tok::Mod,
+		&Tok::BitAnd, &Tok::BitOr, &Tok::BitXor,
+		&Tok::BitShL, &Tok::BitShR))
+	{
+		const auto old_next_tok = next_tok();
+
+		lex();
+
+		if (old_next_tok == &Tok::Mul)
+		{
+			//ret *= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::Mul, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::Div)
+		{
+			//ret /= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::SgnDiv, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::Mod)
+		{
+			ret = code().mk_binop(IrnOp::SgnMod, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::BitAnd)
+		{
+			//ret &= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::BitAnd, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::BitOr)
+		{
+			//ret |= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::BitOr, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::BitXor)
+		{
+			//ret ^= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::BitXor, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::BitShL)
+		{
+			//ret <<= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::Lsl, ret, __parse_factor());
+		}
+		else if (old_next_tok == &Tok::BitShR)
+		{
+			//ret >>= __handle_factor(some_parse_vec, index);
+			ret = code().mk_binop(IrnOp::Asr, ret, __parse_factor());
+		}
+	}
+	return ret;
+
+}
+IrNode* Compiler::__parse_factor()
+{
+	IrNode* ret = nullptr;
+
+	if (next_tok() == &Tok::NatNum)
+	{
+		ret = code().mk_const(next_num());
+		lex();
+		return ret;
+	}
+	//else if (next_tok() == &Tok::Ident)
+	//{
+	//}
+
+	else if (next_tok() == &Tok::LParen)
+	{
+		lex();
+
+		ret = parse_expr();
+
+		match(&Tok::RParen);
+	}
+	else
+	{
+		we().err("Invalid expression");
+	}
+
+
+	return ret;
+
+}
+
+
+void Compiler::print_code() const
+{
+	for (auto irn=code().head.next; irn!=&code().head; irn=irn->next)
+	{
+		code().osprint_irn(cout, irn);
+		printout("\n");
+	}
 }
 
 }

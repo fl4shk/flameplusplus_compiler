@@ -73,7 +73,7 @@ LIST_OF_MULTI_CHAR_COMPARISON_OPERATOR_TOKENS(TOKEN_STUFF)
 /* "+", "-", etc */ \
 TOKEN_STUFF(Plus, "+") \
 TOKEN_STUFF(Minus, "-") \
-TOKEN_STUFF(Mult, "*") \
+TOKEN_STUFF(Mul, "*") \
 TOKEN_STUFF(Div, "/") \
 TOKEN_STUFF(Mod, "%") \
 \
@@ -214,6 +214,30 @@ public:		// functions
 	gen_setter_by_rval_ref(str)
 
 };
+
+
+inline bool any_tok_matches(PTok tok)
+{
+	return false;
+}
+
+template<typename... RemArgTypes>
+bool any_tok_matches(PTok tok, PTok next, 
+	RemArgTypes&&... rem_args)
+{
+	if (sizeof...(rem_args) == 0)
+	{
+		return (tok == next);
+	}
+	else if (tok == next)
+	{
+		return true;
+	}
+	else
+	{
+		return any_tok_matches(tok, rem_args...);
+	}
+}
 
 }
 
