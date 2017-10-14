@@ -60,7 +60,7 @@ int Compiler::operator () ()
 
 
 	// For testing
-	parse_expr();
+	parse_expr(false);
 
 	print_code();
 
@@ -426,35 +426,128 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 {
 	IrNode* ret = nullptr;
 
-	if (next_tok() == &Tok::Plus)
+	//if (next_tok() == &Tok::Plus)
+	//{
+	//	lex();
+	//}
+	//else if (next_tok() == &Tok::Minus)
+	//{
+	//	lex();
+
+	//	//ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
+	//	//	__parse_term(unsgn);
+	//	ret = code().mk_negate(__parse_term(unsgn));
+	//}
+	//else if (next_tok() == &Tok::BitNot)
+	//{
+	//	lex();
+
+	//	ret = code().mk_bitnot(__parse_term(unsgn));
+	//}
+	//else if (next_tok() == &Tok::LogNot)
+	//{
+	//	lex();
+
+	//	ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
+	//		__parse_term(unsgn));
+	//	ret = code().mk_bitnot(ret);
+	//}
+	//else
+	//{
+	//	ret = __parse_term(unsgn);
+	//}
+
+	//while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
+	//{
+	//	const bool minus = (next_tok() == &Tok::Minus);
+
+	//	lex();
+
+	//	if (minus)
+	//	{
+	//		ret = code().mk_binop(IrnOp::Sub, ret, parse_expr(unsgn));
+	//	}
+	//	else
+	//	{
+	//		ret = code().mk_binop(IrnOp::Add, ret, parse_expr(unsgn));
+	//	}
+	//}
+
+
 	{
+	std::vector<PTok> leading_tok_vec;
+
+	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus,
+		&Tok::BitNot, &Tok::LogNot))
+	{
+		leading_tok_vec.push_back(next_tok());
 		lex();
 	}
-	else if (next_tok() == &Tok::Minus)
-	{
-		lex();
 
-		//ret = code().mk_binop(IrnOp::Sub, code().mk_const(0), 
-		//	__parse_term(unsgn);
-		ret = code().mk_negate(__parse_term(unsgn));
-	}
-	else if (next_tok() == &Tok::BitNot)
-	{
-		lex();
 
-		ret = code().mk_bitnot(__parse_term(unsgn));
-	}
-	else if (next_tok() == &Tok::LogNot)
-	{
-		lex();
+	//for (const auto& tok : leading_tok_vec)
+	//for (s64 i=leading_tok_vec.size()-1; i>=0; --i)
+	//{
+	//	if (tok == &Tok::Plus)
+	//	{
+	//	}
+	//	else if (tok == &Tok::Minus)
+	//	{
+	//		ret = code().mk_negate(__parse_term(unsgn));
+	//	}
+	//}
 
-		ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
-			__parse_term(unsgn));
-		ret = code().mk_bitnot(ret);
+	if (leading_tok_vec.size() != 0)
+	{
+		const auto& last_tok = leading_tok_vec.back();
+
+		if (last_tok == &Tok::Plus)
+		{
+			ret = __parse_term(unsgn);
+		}
+		else if (last_tok == &Tok::Minus)
+		{
+			ret = code().mk_negate(__parse_term(unsgn));
+		}
+		else if (last_tok == &Tok::BitNot)
+		{
+			ret = code().mk_bitnot(__parse_term(unsgn));
+		}
+		else // if (last_tok == &Tok::LogNot)
+		{
+			ret = code().mk_binop(IrnOp::Eq, code().mk_const(0),
+				__parse_term(unsgn));
+			ret = code().mk_bitnot(ret);
+		}
+
+		for (s64 i=leading_tok_vec.size()-2; i>=0; --i)
+		{
+			const auto& tok = leading_tok_vec.at(i);
+
+			if (tok == &Tok::Plus)
+			{
+			}
+			else if (tok == &Tok::Minus)
+			{
+				ret = code().mk_negate(ret);
+			}
+			else if (last_tok == &Tok::BitNot)
+			{
+				ret = code().mk_bitnot(ret);
+			}
+			else // if (last_tok == &Tok::LogNot)
+			{
+				ret = code().mk_binop(IrnOp::Eq, code().mk_const(0), ret);
+				ret = code().mk_bitnot(ret);
+			}
+		}
 	}
 	else
 	{
 		ret = __parse_term(unsgn);
+	}
+
+
 	}
 
 	while (any_tok_matches(next_tok(), &Tok::Plus, &Tok::Minus))
@@ -472,6 +565,7 @@ IrNode* Compiler::__parse_expr_regular(bool unsgn)
 			ret = code().mk_binop(IrnOp::Add, ret, parse_expr(unsgn));
 		}
 	}
+
 
 	return ret;
 }

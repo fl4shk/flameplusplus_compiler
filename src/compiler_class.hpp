@@ -166,10 +166,10 @@ private:		// functions
 
 
 
-	IrNode* parse_expr(bool unsgn=false);
-	IrNode* __parse_expr_regular(bool unsgn=false);
-	IrNode* __parse_term(bool unsgn=false);
-	IrNode* __parse_factor(bool unsgn=false);
+	IrNode* parse_expr(bool unsgn);
+	IrNode* __parse_expr_regular(bool unsgn);
+	IrNode* __parse_term(bool unsgn);
+	IrNode* __parse_factor(bool unsgn);
 
 
 
