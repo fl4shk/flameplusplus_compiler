@@ -19,6 +19,8 @@
 #ifndef irnode_stuff_hpp
 #define irnode_stuff_hpp
 
+#include "var_class.hpp"
+
 namespace flame_plus_plus
 {
 
@@ -276,8 +278,8 @@ class IrBinOpNode : public IrNode
 {
 public:		// functions
 	inline IrBinOpNode(IrnBinOp s_op, IrNode* s_irnarg0, IrNode* s_irnarg1)
-		: __op((s64)s_op)
 	{
+		__op = (s64)s_op;
 		init_array(__irnarg, s_irnarg0, s_irnarg1);
 	}
 	bool is_binop() const;
@@ -292,8 +294,8 @@ class IrUnOpNode : public IrNode
 {
 public:		// functions
 	inline IrUnOpNode(IrnUnOp s_op, IrNode* s_irnarg0)
-		: __op((s64)s_op)
 	{
+		__op = (s64)s_op;
 		__irnarg[0] = s_irnarg0;
 	}
 	bool is_unop() const;
@@ -304,8 +306,9 @@ class IrLdStNode : public IrNode
 public:		// functions
 	inline IrLdStNode(IrnLdStOp s_op, Var* s_varg, IrNode* s_irnarg0,
 		IrNode* s_irnarg1)
-		: __op((s64)s_op), __varg(s_varg)
+		: __varg(s_varg)
 	{
+		__op = (s64)s_op;
 	}
 
 	bool is_ldst_32() const;
