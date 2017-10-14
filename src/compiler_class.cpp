@@ -60,7 +60,18 @@ int Compiler::operator () ()
 
 
 	// For testing
-	parse_expr(false);
+	//parse_expr(true);
+
+	while (parse_var_decl(true))
+	{
+		parse_var_decl();
+	}
+
+	while (parse_assignment_stmt(true))
+	{
+		parse_assignment_stmt();
+	}
+
 
 	print_code();
 
@@ -326,6 +337,74 @@ bool Compiler::parse_continue_stmt(bool just_test)
 }
 bool Compiler::parse_assignment_stmt(bool just_test)
 {
+	Var* var;
+	if (next_tok() == &Tok::Ident)
+	{
+		if (just_test)
+		{
+			return true;
+		}
+		var = var_tbl().find(next_sym_str());
+		lex();
+	}
+	else
+	{
+		if (!just_test)
+		{
+			we().err("parse_assignment_stmt():  Unexpected token");
+		}
+		return false;
+	}
+
+	match(&Tok::Equals);
+
+	IrNode* rhs = nullptr;
+
+	size_t size = 0;
+
+	// Temporary!
+	if (var->type_name() == "s32")
+	{
+		rhs = parse_expr(false);
+		size = 32;
+	}
+	else if (var->type_name() == "u32")
+	{
+		rhs = parse_expr(true);
+		size = 32;
+	}
+	else
+	{
+		we().err("parse_assignment_stmt():  Not yet supported typename, ",
+			"or possibly not ever supported typename!");
+	}
+
+	match(&Tok::Semicolon);
+
+
+	if (size == 8)
+	{
+		code().mk_stop(IrnStoreType::St8, var, rhs);
+	}
+	else if (size == 16)
+	{
+		code().mk_stop(IrnStoreType::St16, var, rhs);
+	}
+	else if (size == 32)
+	{
+		code().mk_stop(IrnStoreType::St32, var, rhs);
+	}
+	else if (size == 64)
+	{
+		code().mk_stop(IrnStoreType::St64, var, rhs);
+	}
+	else
+	{
+		we().err("parse_assignment_stmt():  Eek!\n");
+	}
+
+
+
 	return false;
 }
 
@@ -568,15 +647,31 @@ IrNode* Compiler::__parse_factor(bool unsgn)
 
 	if (next_tok() == &Tok::NatNum)
 	{
-		ret = code().mk_const(next_num());
 		lex();
+
+		ret = code().mk_const(next_num());
 		return ret;
 	}
-	//else if (next_tok() == &Tok::Ident)
-	//{
+	else if (next_tok() == &Tok::Ident)
+	{
+		lex();
 
-	//	lex();
-	//}
+		// Temporary!
+		if (!unsgn)
+		{
+			ret = code().mk_ldop(IrnLoadType::LdSgn32, 
+				var_tbl().find(next_sym_str()));
+		}
+		else
+		{
+		{
+			ret = code().mk_ldop(IrnLoadType::LdUnsgn32, 
+				var_tbl().find(next_sym_str()));
+		}
+		}
+
+		return ret;
+	}
 
 	else if (next_tok() == &Tok::LParen)
 	{
